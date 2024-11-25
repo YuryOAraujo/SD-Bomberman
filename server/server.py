@@ -1,9 +1,8 @@
-# server.py
 import socket
 import threading
 import pickle
 
-HOST = '127.0.0.1'  # Localhost for now; change to your public IP for remote play
+HOST = '127.0.0.1'
 PORT = 5555
 MAX_PLAYERS = 4
 
@@ -13,12 +12,12 @@ class Server:
         self.server.bind((HOST, PORT))
         self.server.listen(MAX_PLAYERS)
         self.clients = []
-        self.player_positions = [(400, 300), (450, 300), (400, 350), (450, 350)]  # Starting positions
+        self.player_data = [{"position": (400, 300), "direction": "down"} for _ in range(MAX_PLAYERS)]
 
-    def broadcast(self, data):
+    def broadcast(self):
         for client in self.clients:
             try:
-                client.send(pickle.dumps(data))
+                client.send(pickle.dumps(self.player_data))
             except:
                 self.clients.remove(client)
 
@@ -26,8 +25,8 @@ class Server:
         while True:
             try:
                 data = pickle.loads(client.recv(1024))
-                self.player_positions[player_id] = data
-                self.broadcast(self.player_positions)
+                self.player_data[player_id] = data
+                self.broadcast()
             except:
                 self.clients.remove(client)
                 break
@@ -41,10 +40,11 @@ class Server:
 
                 player_id = len(self.clients)
                 self.clients.append(client)
-                client.send(pickle.dumps(player_id))  # Send the player their ID
+                client.send(pickle.dumps(player_id))
 
                 thread = threading.Thread(target=self.handle_client, args=(client, player_id))
                 thread.start()
+
 
 if __name__ == "__main__":
     Server().run()

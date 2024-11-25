@@ -20,7 +20,7 @@ class Game:
         self.server_host = '127.0.0.1'
         self.server_port = 5555
         self.player_id = None
-        self.positions = []
+        self.player_data = []
 
         self.connect_to_server()
 
@@ -44,15 +44,19 @@ class Game:
     def listen_for_updates(self):
         while True:
             try:
-                self.positions = pickle.loads(self.client.recv(1024))
+                self.player_data = pickle.loads(self.client.recv(1024))
             except Exception as e:
                 print(f"Connection lost: {e}")
                 self.client.close()
                 exit()
 
-    def send_position(self):
+    def send_position_and_direction(self):
         try:
-            self.client.send(pickle.dumps(self.local_player.rect.topleft))
+            data = {
+                "position": self.local_player.rect.topleft,
+                "direction": self.local_player.direction,
+            }
+            self.client.send(pickle.dumps(data))
         except Exception as e:
             print(f"Failed to send position: {e}")
             self.client.close()
@@ -65,19 +69,22 @@ class Game:
                     pygame.quit()
                     exit()
 
-            self.local_player.update()
-            self.send_position()
+            self.local_player.update(is_local_player=True)
+            self.send_position_and_direction()
 
-            print(self.local_player.rect.topleft)
-
-            for i, pos in enumerate(self.positions):
-                list(self.players)[i].rect.topleft = pos
+            for i, data in enumerate(self.player_data):
+                if i != self.player_id:
+                    player = list(self.players)[i]
+                    player.set_position(data["position"])
+                    player.direction = data["direction"]
+                    player.update()
 
             self.screen.fill(WHITE)
             self.players.draw(self.screen)
 
             pygame.display.update()
             self.clock.tick(FPS)
+
 
 if __name__ == "__main__":
     Game().run()

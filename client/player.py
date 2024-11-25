@@ -45,6 +45,13 @@ class Player(pygame.sprite.Sprite):
         else:
             self.image = self.animations[self.direction][0]
 
+    def set_position(self, new_position):
+        if self.rect.topleft != new_position:
+            self.moving = True
+        else:
+            self.moving = False
+        self.rect.topleft = new_position
+
     def load_animations(self):
         sprite_sheet = SpriteSheet(pygame.image.load("client/graphics/bomb_party_v3.png").convert_alpha())
 
@@ -67,6 +74,7 @@ class Player(pygame.sprite.Sprite):
 
         return animations
 
-    def update(self):
-        self.player_input()
+    def update(self, is_local_player=False):
+        if is_local_player:
+            self.player_input()
         self.update_animation()
