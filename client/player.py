@@ -3,40 +3,77 @@ from constants import *
 from spritesheet import SpriteSheet
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, player_id: int):
+    def __init__(self, player_id: int) -> None:
         super().__init__()
         self.player_id = player_id
         self.animations = self.load_animations()
         self.direction = "down"
         self.image = self.animations[self.direction][0]
         self.rect = self.image.get_rect()
-        self.rect.center = (400, 300)
-        self.speed = 5
+        self.rect.center = (48, 48)
+        self.speed = 4
         self.frame_index = 1
         self.animation_speed = 0.15
         self.moving = False
 
-    def player_input(self):
+    def align_to_grid(self) -> None:
+        cell_width = SCALE * SPRITE_WIDTH
+        cell_height = SCALE * SPRITE_HEIGHT
+
+        offset_x = self.rect.x % cell_width
+        offset_y = self.rect.y % cell_height
+
+        if offset_x <= PIXEL_EDGE or offset_x >= cell_width - PIXEL_EDGE:
+            self.rect.x = round(self.rect.x / cell_width) * cell_width
+        if offset_y <= PIXEL_EDGE or offset_y >= cell_height - PIXEL_EDGE:
+            self.rect.y = round(self.rect.y / cell_height) * cell_height
+
+    def player_input(self, obstacles=None) -> None:
         keys = pygame.key.get_pressed()
         self.moving = False
-        if keys[pygame.K_LEFT] or keys[pygame.K_a] and self.rect.left > 0:
+        prev_direction = self.direction
+
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.rect.left > 0:
             self.rect.x -= self.speed
             self.direction = "left"
             self.moving = True
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and self.rect.right < WIDTH:
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.right < WIDTH:
             self.rect.x += self.speed
             self.direction = "right"
             self.moving = True
-        elif keys[pygame.K_UP] or keys[pygame.K_w] and self.rect.top > 0:
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and self.rect.top > 0:
             self.rect.y -= self.speed
             self.direction = "up"
             self.moving = True
-        elif keys[pygame.K_DOWN] or keys[pygame.K_s] and self.rect.bottom < HEIGHT:
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.rect.bottom < HEIGHT:
             self.rect.y += self.speed
             self.direction = "down"
             self.moving = True
 
-    def update_animation(self):
+        if self.direction != prev_direction:
+            self.align_to_grid()
+
+        self.colision(obstacles)
+
+        self.rect.x = max(0, min(self.rect.x, WIDTH - SPRITE_WIDTH))
+        self.rect.y = max(0, min(self.rect.y, HEIGHT - SPRITE_HEIGHT))
+
+    def colision(self, obstacles) -> None:
+        if obstacles is None:
+            return
+        for row in obstacles:
+            for obstacle in row:
+                if obstacle is not None and self.rect.colliderect(obstacle):
+                    if self.direction == "left":
+                        self.rect.left = obstacle.right
+                    elif self.direction == "right":
+                        self.rect.right = obstacle.left
+                    elif self.direction == "up":
+                        self.rect.top = obstacle.bottom
+                    elif self.direction == "down":
+                        self.rect.bottom = obstacle.top
+
+    def update_animation(self) -> None:
         if self.moving:
             self.frame_index += self.animation_speed
             if self.frame_index >= len(self.animations[self.direction]):
@@ -52,7 +89,7 @@ class Player(pygame.sprite.Sprite):
             self.moving = False
         self.rect.topleft = new_position
 
-    def load_animations(self):
+    def load_animations(self) -> dict:
         sprite_sheet = SpriteSheet(pygame.image.load("client/graphics/bomb_party_v3.png").convert_alpha())
 
         animations = {
@@ -74,7 +111,7 @@ class Player(pygame.sprite.Sprite):
 
         return animations
 
-    def update(self, is_local_player=False):
+    def update(self, is_local_player: bool = False, obstacles=None) -> None:
         if is_local_player:
-            self.player_input()
+            self.player_input(obstacles)
         self.update_animation()

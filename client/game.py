@@ -3,10 +3,18 @@ import socket
 import pickle
 from constants import *
 from player import Player
+from map import Map
 from threading import Thread
 
+player_positions = [
+    (48, 48),
+    (624, 48),
+    (48, 624),
+    (624, 624)
+]
+
 class Game:
-    def __init__(self):
+    def __init__(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
@@ -21,18 +29,22 @@ class Game:
         self.server_port = 5555
         self.player_id = None
         self.player_data = []
+        self.map = None
 
         self.connect_to_server()
 
-    def connect_to_server(self):
+    def connect_to_server(self) -> None:
         try:
             self.client.connect((self.server_host, self.server_port))
+
             self.player_id = pickle.loads(self.client.recv(1024))
             print(f"Connected to server as Player {self.player_id}")
-            
+
+            self.map = Map(pickle.loads(self.client.recv(4096)))
+
             for i in range(4):
                 player = Player(i + 1)
-                player.rect.topleft = (400, 300)
+                player.rect.topleft = player_positions[i]
                 self.players.add(player)
             self.local_player = list(self.players)[self.player_id]
 
@@ -41,7 +53,7 @@ class Game:
             print(f"Failed to connect to server: {e}")
             exit()
 
-    def listen_for_updates(self):
+    def listen_for_updates(self) -> None:
         while True:
             try:
                 self.player_data = pickle.loads(self.client.recv(1024))
@@ -50,7 +62,7 @@ class Game:
                 self.client.close()
                 exit()
 
-    def send_position_and_direction(self):
+    def send_position_and_direction(self) -> None:
         try:
             data = {
                 "position": self.local_player.rect.topleft,
@@ -62,24 +74,26 @@ class Game:
             self.client.close()
             exit()
 
-    def run(self):
+    def run(self) -> None:
         while True:
+            self.screen.fill(PINK)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
 
-            self.local_player.update(is_local_player=True)
+            self.map.draw_map(self.screen)
+
+            self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
             self.send_position_and_direction()
 
             for i, data in enumerate(self.player_data):
-                if i != self.player_id:
+                if i != self.player_id:  # Ignora o jogador local
                     player = list(self.players)[i]
                     player.set_position(data["position"])
                     player.direction = data["direction"]
                     player.update()
 
-            self.screen.fill(WHITE)
             self.players.draw(self.screen)
 
             pygame.display.update()
