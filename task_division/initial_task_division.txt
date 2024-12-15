@@ -1,0 +1,9 @@
+Divisão inicial das tarefas
+
+Cliente
+Interface gráfica, moodboard e wireframe: Gabriel Afonso
+Lógica de jogo (client side): Igor e Yury
+Busca e inserção de audios (copyright free): Pedro
+
+Servidor
+Implementação da comunicação por sockets UDP: Michelle e Myller
