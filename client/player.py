@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 1
         self.animation_speed = 0.15
         self.moving = False
+        self.health = 3
 
     def align_to_grid(self) -> None:
         cell_width = SCALE * SPRITE_WIDTH

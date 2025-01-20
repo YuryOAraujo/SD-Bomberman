@@ -6,6 +6,7 @@ from player import Player
 from map import Map
 from threading import Thread
 from menu import Menu
+from game_ui import GameUI 
 
 player_positions = [
     (48, 48),
@@ -17,7 +18,7 @@ player_positions = [
 class Game:
     def __init__(self, server_host, server_port) -> None:
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((TOTAL_WIDTH, HEIGHT))  # Tela com área da interface
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.game_active = False
@@ -32,7 +33,14 @@ class Game:
         self.player_data = []
         self.map = None
 
+        # Conecta ao servidor e inicializa os jogadores
         self.connect_to_server()
+
+        # Obtém as imagens dos personagens virados para frente
+        player_images = [player.animations["down"][0] for player in self.players]
+
+        # Inicializa a interface do usuário (UI)
+        self.ui = GameUI(self.screen, self.players, UI_WIDTH, WIDTH, player_images)  # Passa as imagens dos personagens
 
     def connect_to_server(self) -> None:
         try:
@@ -76,6 +84,7 @@ class Game:
             exit()
 
     def run(self) -> None:
+        time_left = 90  # Exemplo de tempo restante
         while True:
             self.screen.fill(PINK)
             for event in pygame.event.get():
@@ -83,6 +92,7 @@ class Game:
                     pygame.quit()
                     exit()
 
+            # Desenha o mapa na área do mapa (à esquerda)
             self.map.draw_map(self.screen)
 
             self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
@@ -96,6 +106,9 @@ class Game:
                     player.update()
 
             self.players.draw(self.screen)
+
+            # Desenha a interface na área da interface (à direita)
+            self.ui.draw(time_left)
 
             pygame.display.update()
             self.clock.tick(FPS)
