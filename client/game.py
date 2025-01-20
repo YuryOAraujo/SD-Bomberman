@@ -5,6 +5,7 @@ from constants import *
 from player import Player
 from map import Map
 from threading import Thread
+from menu import Menu
 
 player_positions = [
     (48, 48),
@@ -14,7 +15,7 @@ player_positions = [
 ]
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, server_host, server_port) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
@@ -25,8 +26,8 @@ class Game:
         self.local_player = None
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_host = '127.0.0.1'
-        self.server_port = 5555
+        self.server_host = server_host  
+        self.server_port = server_port 
         self.player_id = None
         self.player_data = []
         self.map = None
@@ -101,4 +102,5 @@ class Game:
 
 
 if __name__ == "__main__":
-    Game().run()
+    Menu().menu_loop()
+    
