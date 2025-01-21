@@ -100,7 +100,7 @@ class Bomb(pygame.sprite.Sprite):
                 elif y != self.rect.y:
                     sprite = self.animations["explosion_path"][4].copy()
 
-            sprite.set_alpha(0)  # Start with fully transparent
+            sprite.set_alpha(0)
             self.explosion_sprites[(x, y)] = sprite
 
     def update(self, surface):
@@ -115,21 +115,17 @@ class Bomb(pygame.sprite.Sprite):
                 self.image = self.animations["explosion_fade"][0]
                 self.explode()
         else:
-            # Flicker effect for both self.image and explosion_sprites
             self.flicker_timer += 1
             if self.flicker_timer >= self.flicker_speed:
                 self.flicker_timer = 0
-                self.explosion_alpha = 255 if self.explosion_alpha == 0 else 0  # Toggle between 0 and 255
+                self.explosion_alpha = 255 if self.explosion_alpha == 0 else 0
 
-            # Apply alpha to self.image
             self.image.set_alpha(self.explosion_alpha)
             surface.blit(self.image, self.rect.topleft)
 
-            # Apply alpha to explosion_sprites
             for (x, y), sprite in self.explosion_sprites.items():
                 sprite.set_alpha(self.explosion_alpha)
                 surface.blit(sprite, (x, y))
 
-            # End explosion after a certain time
             if time.time() - self.planted >= self.timer + 1:
                 self.kill()

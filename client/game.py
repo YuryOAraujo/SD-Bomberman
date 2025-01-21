@@ -83,7 +83,7 @@ class Game:
                     pygame.quit()
                     exit()
 
-            self.map.draw_map(self.screen)
+            #self.map.draw_map(self.screen)
 
             bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
             if bomb:
@@ -101,9 +101,18 @@ class Game:
             for bomb in self.bombs:
                 bomb.update(self.screen)
 
-            self.bombs.draw(self.screen)
+                if bomb.exploding:
+                    for player in self.players:
+                        if not player.eliminated:
+                            for (x, y), explosion_sprite in bomb.explosion_sprites.items():
+                                explosion_rect = explosion_sprite.get_rect(topleft=(x, y))
+                                if player.rect.colliderect(explosion_rect):
+                                    player.eliminate()
+                                    print(f"Player {player.player_id} has been eliminated!")
 
+            self.bombs.draw(self.screen)
             self.players.draw(self.screen)
+
 
             pygame.display.update()
             self.clock.tick(FPS)
