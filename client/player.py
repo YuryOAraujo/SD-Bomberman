@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.max_bombs = 1
         self.explosion_range = 2
         self.eliminated = False
+        self.lives = 3
 
     def place_bomb(self) -> Bomb:
         if self.bombs_placed < self.max_bombs:
@@ -138,5 +139,9 @@ class Player(pygame.sprite.Sprite):
         return None
     
     def eliminate(self):
-        self.eliminated = True
-        print(f"Player {self.player_id} has been eliminated!")
+        #Needs to implement logic to remove the player from the round
+        self.lives -= 1
+        if self.lives == 0:
+            self.eliminated = True
+            print(f"Player {self.player_id} was eliminated!")
+        
