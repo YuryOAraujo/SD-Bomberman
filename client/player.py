@@ -1,6 +1,7 @@
 import pygame
 from constants import *
 from spritesheet import SpriteSheet
+from bomb import Bomb
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, player_id: int) -> None:
@@ -15,6 +16,16 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 1
         self.animation_speed = 0.15
         self.moving = False
+        self.bombs_placed = 0
+        self.max_bombs = 1
+        self.explosion_range = 2
+
+    def place_bomb(self) -> Bomb:
+        if self.bombs_placed < self.max_bombs:
+            bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
+            self.bombs_placed += 1
+            return bomb
+        return None
 
     def align_to_grid(self) -> None:
         cell_width = SCALE * SPRITE_WIDTH
@@ -57,6 +68,12 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x = max(0, min(self.rect.x, WIDTH - SPRITE_WIDTH))
         self.rect.y = max(0, min(self.rect.y, HEIGHT - SPRITE_HEIGHT))
+
+        if keys[pygame.K_SPACE]:
+            bomb = self.place_bomb()
+            if bomb:
+                return bomb
+        return None
 
     def colision(self, obstacles) -> None:
         if obstacles is None:
@@ -113,5 +130,8 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, is_local_player: bool = False, obstacles=None) -> None:
         if is_local_player:
-            self.player_input(obstacles)
+            bomb = self.player_input(obstacles)
+            if bomb:
+                return bomb
         self.update_animation()
+        return None

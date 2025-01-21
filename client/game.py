@@ -22,6 +22,7 @@ class Game:
         self.game_active = False
 
         self.players = pygame.sprite.Group()
+        self.bombs = pygame.sprite.Group()
         self.local_player = None
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -76,7 +77,7 @@ class Game:
 
     def run(self) -> None:
         while True:
-            self.screen.fill(PINK)
+            self.screen.fill(WHITE)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -84,7 +85,10 @@ class Game:
 
             self.map.draw_map(self.screen)
 
-            self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
+            bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
+            if bomb:
+                self.bombs.add(bomb)
+            
             self.send_position_and_direction()
 
             for i, data in enumerate(self.player_data):
@@ -93,6 +97,11 @@ class Game:
                     player.set_position(data["position"])
                     player.direction = data["direction"]
                     player.update()
+
+            for bomb in self.bombs:
+                bomb.update(self.screen)
+
+            self.bombs.draw(self.screen)
 
             self.players.draw(self.screen)
 
