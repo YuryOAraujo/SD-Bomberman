@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 1
         self.animation_speed = 0.15
         self.moving = False
+
         self.bombs_placed = 0
         self.max_bombs = 1
         self.explosion_range = 2
