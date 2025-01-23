@@ -5,6 +5,7 @@ from constants import *
 from player import Player
 from map import Map
 from threading import Thread
+import time
 
 player_positions = [
     (48, 48),
@@ -19,7 +20,7 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
-        self.game_active = False
+        self.game_active = True
 
         self.players = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()
@@ -31,6 +32,12 @@ class Game:
         self.player_id = None
         self.player_data = []
         self.map = None
+
+        self.round_active = False
+        self.elapsed_rounds = 0
+        self.max_wins = 3
+        self.winner = ''
+        self.game_over = False
 
         self.connect_to_server()
 
@@ -44,8 +51,8 @@ class Game:
             self.map = Map(pickle.loads(self.client.recv(4096)))
 
             for i in range(4):
-                player = Player(i + 1)
-                player.rect.topleft = player_positions[i]
+                player = Player(i + 1, initial_position=player_positions[i])
+
                 self.players.add(player)
             self.local_player = list(self.players)[self.player_id]
 
@@ -75,47 +82,82 @@ class Game:
             self.client.close()
             exit()
 
+    def reset_round(self) -> None:
+        self.bombs.empty()
+        
+        for player in self.players:
+            player.rect.topleft = player_positions[player.player_id - 1]
+            player.eliminated = False 
+            player.reset_bombs()
+
     def run(self) -> None:
-        while True:
-            self.screen.fill(WHITE)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
+        while self.game_active:
+            if not self.game_over:
+                print(f'Current round: {self.elapsed_rounds}')
+                self.round_active = True
+                self.reset_round()
 
-            #self.map.draw_map(self.screen)
+                for player in self.players:
+                    if player.round_wins == self.max_wins:
+                        self.round_active = False
+                        self.winner = player.player_id
+                        print(f"Player {self.winner} wins the game!")
+                        #Retornar para o menu
+                        self.game_over = True
+                        break            
 
-            bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
-            if bomb:
-                self.bombs.add(bomb)
-            
-            self.send_position_and_direction()
+                while self.round_active:
+                    self.screen.fill(WHITE)
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            exit()
 
-            for i, data in enumerate(self.player_data):
-                if i != self.player_id:  # Ignora o jogador local
-                    player = list(self.players)[i]
-                    player.set_position(data["position"])
-                    player.direction = data["direction"]
-                    player.update()
+                    #self.map.draw_map(self.screen)
 
-            for bomb in self.bombs:
-                bomb.update(self.screen)
+                    bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
+                    if bomb:
+                        self.bombs.add(bomb)
+                    
+                    self.send_position_and_direction()
 
-                if bomb.exploding:
-                    for player in self.players:
-                        if not player.eliminated:
-                            for (x, y), explosion_sprite in bomb.explosion_sprites.items():
-                                explosion_rect = explosion_sprite.get_rect(topleft=(x, y))
-                                if player.rect.colliderect(explosion_rect):
-                                    player.eliminate()
-                                    print(f"Player {player.player_id} has been eliminated!")
+                    for i, data in enumerate(self.player_data):
+                        if i != self.player_id:
+                            player = list(self.players)[i]
+                            player.set_position(data["position"])
+                            player.direction = data["direction"]
+                            player.update()
 
-            self.bombs.draw(self.screen)
-            self.players.draw(self.screen)
+                    last_eliminated_player = None
 
+                    for bomb in self.bombs:
+                        bomb.update(self.screen)
 
-            pygame.display.update()
-            self.clock.tick(FPS)
+                        if bomb.exploding:
+                            for player in self.players:
+                                if not player.eliminated:
+                                    for (x, y), explosion_sprite in bomb.explosion_sprites.items():
+                                        explosion_rect = explosion_sprite.get_rect(topleft=(x, y))
+                                        if player.rect.colliderect(explosion_rect):
+                                            player.eliminate()
+                                            last_eliminated_player = player
+                                            print(f"Player {player.player_id} has been eliminated!")
+
+                    self.bombs.draw(self.screen)
+                    self.players.draw(self.screen)
+
+                    alive_players = [player for player in self.players if not player.eliminated]
+
+                    if len(alive_players) <= 1:
+                        winner = alive_players[0] if alive_players else last_eliminated_player
+                        if winner:
+                            winner.round_wins += 1
+                            print(f"Player {winner.player_id} wins the round!")
+                        self.elapsed_rounds += 1
+                        break
+
+                    pygame.display.update()
+                    self.clock.tick(FPS)
 
 
 if __name__ == "__main__":

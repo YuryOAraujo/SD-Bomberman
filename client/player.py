@@ -4,14 +4,14 @@ from spritesheet import SpriteSheet
 from bomb import Bomb
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, player_id: int) -> None:
+    def __init__(self, player_id: int, initial_position) -> None:
         super().__init__()
         self.player_id = player_id
         self.animations = self.load_animations()
         self.direction = "down"
         self.image = self.animations[self.direction][0]
         self.rect = self.image.get_rect()
-        self.rect.center = (48, 48)
+        self.rect.topleft = initial_position
         self.speed = 4
         self.frame_index = 1
         self.animation_speed = 0.15
@@ -20,7 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.max_bombs = 1
         self.explosion_range = 2
         self.eliminated = False
-        self.lives = 3
+        self.round_wins = 0
 
     def place_bomb(self) -> Bomb:
         if self.bombs_placed < self.max_bombs:
@@ -138,10 +138,10 @@ class Player(pygame.sprite.Sprite):
         self.update_animation()
         return None
     
+    def reset_bombs(self):
+        self.bombs_placed = 0
+
     def eliminate(self):
         #Needs to implement logic to remove the player from the round
-        self.lives -= 1
-        if self.lives == 0:
-            self.eliminated = True
-            print(f"Player {self.player_id} was eliminated!")
+        self.eliminated = True
         

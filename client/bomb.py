@@ -77,7 +77,6 @@ class Bomb(pygame.sprite.Sprite):
 
     def explode(self):
         self.exploding = True
-        self.player.bombs_placed -= 1
         self.frame_index = 1
 
         explosion_tiles = self.calculate_explosion_path()
@@ -118,7 +117,7 @@ class Bomb(pygame.sprite.Sprite):
             self.flicker_timer += 1
             if self.flicker_timer >= self.flicker_speed:
                 self.flicker_timer = 0
-                self.explosion_alpha = 255 if self.explosion_alpha == 0 else 0
+                self.explosion_alpha = 0 if self.explosion_alpha == 255 else 255
 
             self.image.set_alpha(self.explosion_alpha)
             surface.blit(self.image, self.rect.topleft)
@@ -127,5 +126,6 @@ class Bomb(pygame.sprite.Sprite):
                 sprite.set_alpha(self.explosion_alpha)
                 surface.blit(sprite, (x, y))
 
-            if time.time() - self.planted >= self.timer + 1:
+            if time.time() - self.planted >= self.timer + 1:  
+                self.player.bombs_placed -= 1
                 self.kill()
