@@ -1,7 +1,6 @@
 WIDTH = 720
 HEIGHT = 624
-UI_WIDTH = 200
-TOTAL_WIDTH = WIDTH + UI_WIDTH  # Largura total da tela
+PLAYABLE_AREA = 624
 FPS = 60
 TITLE = "SD-Bomberman"
 WHITE = (255, 255, 255)

@@ -1,21 +1,34 @@
 import pygame
 from constants import *
 from spritesheet import SpriteSheet
+from bomb import Bomb
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, player_id: int) -> None:
+    def __init__(self, player_id: int, initial_position) -> None:
         super().__init__()
         self.player_id = player_id
         self.animations = self.load_animations()
         self.direction = "down"
         self.image = self.animations[self.direction][0]
         self.rect = self.image.get_rect()
-        self.rect.center = (48, 48)
+        self.rect.topleft = initial_position
         self.speed = 4
         self.frame_index = 1
         self.animation_speed = 0.15
         self.moving = False
-        self.health = 3
+
+        self.bombs_placed = 0
+        self.max_bombs = 1
+        self.explosion_range = 2
+        self.eliminated = False
+        self.round_wins = 0
+
+    def place_bomb(self) -> Bomb:
+        if self.bombs_placed < self.max_bombs:
+            bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
+            self.bombs_placed += 1
+            return bomb
+        return None
 
     def align_to_grid(self) -> None:
         cell_width = SCALE * SPRITE_WIDTH
@@ -58,6 +71,12 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x = max(0, min(self.rect.x, WIDTH - SPRITE_WIDTH))
         self.rect.y = max(0, min(self.rect.y, HEIGHT - SPRITE_HEIGHT))
+
+        if keys[pygame.K_SPACE]:
+            bomb = self.place_bomb()
+            if bomb:
+                return bomb
+        return None
 
     def colision(self, obstacles) -> None:
         if obstacles is None:
@@ -114,5 +133,16 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, is_local_player: bool = False, obstacles=None) -> None:
         if is_local_player:
-            self.player_input(obstacles)
+            bomb = self.player_input(obstacles)
+            if bomb:
+                return bomb
         self.update_animation()
+        return None
+    
+    def reset_bombs(self):
+        self.bombs_placed = 0
+
+    def eliminate(self):
+        #Needs to implement logic to remove the player from the round
+        self.eliminated = True
+        
