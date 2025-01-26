@@ -31,7 +31,7 @@ class Menu:
         self.default_ip = "127.0.0.1"  # IP padrão
         self.default_port = "5555"    # Porta padrão
 
-        self.background_image = pygame.image.load("client/graphics/Fundo.png")
+        self.background_image = pygame.image.load("E:/T.S.I/Estagio/SIte_IF_AVE/SD-Bomberman/client/graphics/Fundo.png")
         self.background_image = pygame.transform.scale(self.background_image, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
     def draw_text(self, text, font, color, center):
@@ -81,12 +81,12 @@ class Menu:
                     elif event.key == pygame.K_DOWN:
                         self.selected_item = (self.selected_item + 1) % len(self.menu_items)  # Navegar para baixo
                     elif event.key == pygame.K_RETURN:
-                        if self.selected_item == 0:
-                            ip, port = self.connection_screen()
-                            if ip and port:
-                                from game import Game  # Importe aqui para evitar loops de importação
-                                game = Game(ip, int(port))
-                                game.run()
+                        if self.selected_item == 0:  # Quando o jogador seleciona "Iniciar"
+                            ip, port = self.connection_screen()  # Obtém o IP e a porta da tela de conexão
+                            if ip and port:  # Verifica se os valores são válidos
+                                from game import Game  # Importa a classe Game
+                                game = Game(ip, int(port))  # Passa o IP e a porta para a classe Game
+                                game.run()  # Inicia o jogo
                         elif self.selected_item == 1:
                             self.credits_screen()
                         elif self.selected_item == 2:
@@ -98,11 +98,11 @@ class Menu:
                         if rect.collidepoint(mouse_pos):
                             self.selected_item = i
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
+                    if event.button == 1:  # Clique esquerdo
                         if self.selected_item == 0:
                             ip, port = self.connection_screen()
                             if ip and port:
-                                from game import Game 
+                                from game import Game
                                 game = Game(ip, int(port))
                                 game.run()
                         elif self.selected_item == 1:
@@ -119,7 +119,9 @@ class Menu:
         ip = self.default_ip  # Usar o IP padrão
         port = self.default_port  # Usar a porta padrão
         active_input = None  # Campo de entrada ativo: "ip" ou "port"
-        while True:
+        running = True  # Controla o loop da tela de conexão
+
+        while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -127,7 +129,7 @@ class Menu:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         if ip and port:
-                            return ip, port
+                            return ip, port  # Retorna o IP e a porta
                     elif event.key == pygame.K_BACKSPACE:
                         if active_input == "ip":
                             ip = ip[:-1]
@@ -144,14 +146,15 @@ class Menu:
                                 port += event.unicode
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Clique esquerdo
-                        if ip_box.collidepoint(event.pos):
+                        mouse_pos = pygame.mouse.get_pos()
+                        if ip_box.collidepoint(mouse_pos):
                             active_input = "ip"
-                        elif port_box.collidepoint(event.pos):
+                        elif port_box.collidepoint(mouse_pos):
                             active_input = "port"
-                        elif confirm_button.collidepoint(event.pos):
+                        elif confirm_button.collidepoint(mouse_pos):
                             if ip and port:
                                 return ip, port  # Confirmar valores e retornar
-                        elif back_button.collidepoint(event.pos):
+                        elif back_button.collidepoint(mouse_pos):
                             return None, None  # Voltar ao menu principal
 
             # Desenhar a tela
@@ -207,7 +210,7 @@ class Menu:
                 "Criadores:",
                 "Gabriel Afonso Barbosa",
                 "Yury Araujo",
-                "Igor Augusto é so uma Matriz",
+                "Igor Augusto",
                 "Michele",
                 "Miller",
                 "Pedro"

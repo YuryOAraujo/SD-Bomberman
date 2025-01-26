@@ -20,9 +20,15 @@ class Server:
 
 
     def broadcast(self) -> None:
+        # Cria um dicionário com os dados do jogo e o número de jogadores conectados
+        data_to_send = {
+            "player_data": self.player_data,
+            "players_connected": len(self.clients)
+        }
+
         for client in self.clients[:]:  # Copia para evitar problemas ao modificar a lista
             try:
-                client.send(pickle.dumps(self.player_data))
+                client.send(pickle.dumps(data_to_send))  # Envia os dados atualizados
             except (BrokenPipeError, ConnectionResetError) as e:
                 print(f"Error sending to client {client}: {e}")
                 self.clients.remove(client)
@@ -34,10 +40,12 @@ class Server:
             try:
                 data = pickle.loads(client.recv(1024))
                 self.player_data[player_id] = data
-                self.broadcast()
+                self.broadcast()  # Atualiza os dados para todos os clientes
             except (EOFError, ConnectionResetError) as e:
                 print(f"Client {player_id} disconnected: {e}")
                 self.clients.remove(client)
+                self.player_data[player_id] = None  # Remove os dados do jogador desconectado
+                self.broadcast()  # Informa aos outros clientes que um jogador desconectou
                 break
             except pickle.UnpicklingError as e:
                 print(f"Failed to decode data from client {player_id}: {e}")
@@ -55,11 +63,18 @@ class Server:
                 player_id = len(self.clients)
                 self.clients.append(client)
 
+                # Envia o ID do jogador e o grid inicial
                 client.send(pickle.dumps(player_id))
                 client.send(pickle.dumps(self.grid))
 
+                # Inicia uma thread para lidar com o cliente
                 thread = threading.Thread(target=self.handle_client, args=(client, player_id))
                 thread.start()
+
+                # Informa a todos os clientes que um novo jogador se conectou
+                self.broadcast()
+            else:
+                print("Maximum number of players reached. Rejecting new connections.")
 
     def generate_boxes(self) -> None:
         for row in range(1, len(self.grid) - 1):

@@ -17,20 +17,23 @@ player_positions = [
 ]
 
 class Game:
-    def __init__(self, ip, port) -> None:
+    def __init__(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
-        self.game_active = True
+        self.game_active = False  # O jogo só começa quando todos os jogadores estiverem conectados
+
+        # Inicializa a tela de carregamento
+        # self.loading_screen = LoadingScreen(self.screen)
 
         self.players = pygame.sprite.Group()
         self.bombs = pygame.sprite.Group()
         self.local_player = None
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_host = ip  # Use o IP fornecido
-        self.server_port = port  # Use a porta fornecida
+        self.server_host = '127.0.0.1'
+        self.server_port = 5555
         self.player_id = None
         self.player_data = []
         self.map = None
@@ -40,23 +43,6 @@ class Game:
         self.max_wins = 3
         self.winner = ''
         self.game_over = False
-
-        # Usar fallback para as imagens dos jogadores
-        self.player_images = []
-        for i in range(4):
-            # Fallback: uma superfície vazia
-            fallback_image = pygame.Surface((32, 32))  # Tamanho padrão
-            fallback_image.fill((255, 0, 0))  # Preenche com vermelho
-            self.player_images.append(fallback_image)
-
-        # Inicializar a interface do usuário
-        self.ui = GameUI(
-            screen=self.screen,
-            players=self.players,  # Passar a lista de jogadores
-            ui_width=200,  # Largura da área da interface
-            map_width=WIDTH,  # Largura do mapa
-            player_images=self.player_images
-        )
 
         self.connect_to_server()
 
@@ -83,7 +69,19 @@ class Game:
     def listen_for_updates(self) -> None:
         while True:
             try:
-                self.player_data = pickle.loads(self.client.recv(1024))
+                data = pickle.loads(self.client.recv(1024))
+                if isinstance(data, dict) and "players_connected" in data:
+                    # Atualiza o número de jogadores conectados na tela de carregamento
+                    self.loading_screen.update_players_connected(data["players_connected"])
+
+                    # Verifica se todos os jogadores estão conectados
+                    if data["players_connected"] == MAX_PLAYERS:
+                        self.game_active = True  # Inicia o jogo
+                        break
+
+                # Atualiza os dados dos jogadores
+                if "player_data" in data:
+                    self.player_data = data["player_data"]
             except Exception as e:
                 print(f"Connection lost: {e}")
                 self.client.close()
@@ -110,7 +108,24 @@ class Game:
             player.reset_bombs()
 
     def run(self) -> None:
+        while not self.game_active:
+            # Exibe a tela de carregamento
+            self.loading_screen.draw()
+
+            # Verifica eventos (por exemplo, se o usuário fechou a janela)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            # Atualiza a tela
+            pygame.display.flip()
+            self.clock.tick(FPS)
+        
         while self.game_active:
+            #  Exibe a tela de carregamento
+            self.loading_screen.draw()
+
             if not self.game_over:
                 print(f'Current round: {self.elapsed_rounds}')
                 self.round_active = True
@@ -121,8 +136,9 @@ class Game:
                         self.round_active = False
                         self.winner = player.player_id
                         print(f"Player {self.winner} wins the game!")
+                        #Retornar para o menu
                         self.game_over = True
-                        break
+                        break            
 
                 while self.round_active:
                     self.screen.fill(WHITE)
@@ -131,14 +147,12 @@ class Game:
                             pygame.quit()
                             exit()
 
-                    # Desenhar o mapa sem deslocamento (começa no canto esquerdo)
-                    self.map.draw_map(self.screen)
+                    #self.map.draw_map(self.screen)
 
-                    # Atualizar e desenhar os jogadores e bombas
                     bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
                     if bomb:
                         self.bombs.add(bomb)
-
+                    
                     self.send_position_and_direction()
 
                     for i, data in enumerate(self.player_data):
@@ -166,10 +180,6 @@ class Game:
                     self.bombs.draw(self.screen)
                     self.players.draw(self.screen)
 
-                    time_left = 100  # Substitua pelo tempo real do jogo
-                    self.ui.draw(time_left)
-
-                    # Verificar se o round terminou
                     alive_players = [player for player in self.players if not player.eliminated]
 
                     if len(alive_players) <= 1:
@@ -185,4 +195,5 @@ class Game:
 
 
 if __name__ == "__main__":
+    Game()
     Game().run()
