@@ -31,7 +31,7 @@ class Menu:
         self.default_ip = "127.0.0.1"  # IP padrão
         self.default_port = "5555"    # Porta padrão
 
-        self.background_image = pygame.image.load("E:/T.S.I/Estagio/SIte_IF_AVE/SD-Bomberman/client/graphics/Fundo.png")
+        self.background_image = pygame.image.load("client/graphics/Fundo.png")
         self.background_image = pygame.transform.scale(self.background_image, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
     def draw_text(self, text, font, color, center):
@@ -207,7 +207,7 @@ class Menu:
                 "Criadores:",
                 "Gabriel Afonso Barbosa",
                 "Yury Araujo",
-                "Igor Augusto",
+                "Igor Augusto é so uma Matriz",
                 "Michele",
                 "Miller",
                 "Pedro"

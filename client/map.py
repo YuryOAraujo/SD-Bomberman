@@ -26,13 +26,13 @@ class Map:
         Desenha o mapa na tela.
 
         :param screen: Superfície do Pygame onde o mapa será desenhado.
-        :param offset_x: Deslocamento horizontal (largura da interface).
+        :param offset_x: Deslocamento horizontal (não será usado aqui).
         :return: Lista de obstáculos.
         """
         for row in range(len(self.grid)):
             for col in range(len(self.grid[row])):
                 # Aplica o deslocamento horizontal (offset_x) às coordenadas x
-                x = col * SPRITE_WIDTH * SCALE + offset_x
+                x = col * SPRITE_WIDTH * SCALE
                 y = row * SPRITE_HEIGHT * SCALE
 
                 if self.grid[row][col] == 0:

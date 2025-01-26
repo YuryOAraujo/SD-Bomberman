@@ -5,6 +5,8 @@ from constants import *
 from player import Player
 from map import Map
 from threading import Thread
+from menu import Menu
+from game_ui import GameUI
 import time
 
 player_positions = [
@@ -15,7 +17,7 @@ player_positions = [
 ]
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, ip, port) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
@@ -27,8 +29,8 @@ class Game:
         self.local_player = None
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_host = '127.0.0.1'
-        self.server_port = 5555
+        self.server_host = ip  # Use o IP fornecido
+        self.server_port = port  # Use a porta fornecida
         self.player_id = None
         self.player_data = []
         self.map = None
@@ -38,6 +40,23 @@ class Game:
         self.max_wins = 3
         self.winner = ''
         self.game_over = False
+
+        # Usar fallback para as imagens dos jogadores
+        self.player_images = []
+        for i in range(4):
+            # Fallback: uma superfície vazia
+            fallback_image = pygame.Surface((32, 32))  # Tamanho padrão
+            fallback_image.fill((255, 0, 0))  # Preenche com vermelho
+            self.player_images.append(fallback_image)
+
+        # Inicializar a interface do usuário
+        self.ui = GameUI(
+            screen=self.screen,
+            players=self.players,  # Passar a lista de jogadores
+            ui_width=200,  # Largura da área da interface
+            map_width=WIDTH,  # Largura do mapa
+            player_images=self.player_images
+        )
 
         self.connect_to_server()
 
@@ -102,9 +121,8 @@ class Game:
                         self.round_active = False
                         self.winner = player.player_id
                         print(f"Player {self.winner} wins the game!")
-                        #Retornar para o menu
                         self.game_over = True
-                        break            
+                        break
 
                 while self.round_active:
                     self.screen.fill(WHITE)
@@ -113,12 +131,14 @@ class Game:
                             pygame.quit()
                             exit()
 
-                    #self.map.draw_map(self.screen)
+                    # Desenhar o mapa sem deslocamento (começa no canto esquerdo)
+                    self.map.draw_map(self.screen)
 
+                    # Atualizar e desenhar os jogadores e bombas
                     bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
                     if bomb:
                         self.bombs.add(bomb)
-                    
+
                     self.send_position_and_direction()
 
                     for i, data in enumerate(self.player_data):
@@ -146,6 +166,10 @@ class Game:
                     self.bombs.draw(self.screen)
                     self.players.draw(self.screen)
 
+                    time_left = 100  # Substitua pelo tempo real do jogo
+                    self.ui.draw(time_left)
+
+                    # Verificar se o round terminou
                     alive_players = [player for player in self.players if not player.eliminated]
 
                     if len(alive_players) <= 1:
