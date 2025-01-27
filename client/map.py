@@ -7,7 +7,7 @@ class Map:
     def __init__(self, grid) -> None:
         self.grid = grid
         self.animations = self.load_animation_map()
-        self.osbtacles = [[], []]
+        self.obstacles = [[], []]
 
     @staticmethod
     def load_animation_map() -> dict:
@@ -39,10 +39,10 @@ class Map:
                     screen.blit(self.animations["grass"], (x, y))
                 elif self.grid[row][col] == 1:
                     block_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
-                    self.osbtacles[0].append(block_rect)
+                    self.obstacles[0].append(block_rect)
                     screen.blit(self.animations["block"], (x, y))
                 elif self.grid[row][col] == 2:
                     boxes_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
-                    self.osbtacles[1].append(boxes_rect)
+                    self.obstacles[1].append(boxes_rect)
                     screen.blit(self.animations["box"], (x, y))
-        return self.osbtacles
+        return self.obstacles

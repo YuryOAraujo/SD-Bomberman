@@ -16,25 +16,49 @@ class Server:
         self.clients = []
         self.grid = GRID_BASE["Stage 1"]
         self.player_data = [{"position": (48, 48), "direction": "down"} for _ in range(MAX_PLAYERS)]
-        self.generate_boxes()
+        self.generate_boxes()   
 
-
-    def broadcast(self) -> None:
-        for client in self.clients[:]:  # Copia para evitar problemas ao modificar a lista
+    def broadcast(self, data) -> None:
+        print(self.clients)
+        for client in self.clients[:]:  
             try:
-                client.send(pickle.dumps(self.player_data))
+                if data.get("type") == "bomb":
+                    print(f'Send: {data}')
+                    print(client)
+                client.send(pickle.dumps(data))
             except (BrokenPipeError, ConnectionResetError) as e:
                 print(f"Error sending to client {client}: {e}")
                 self.clients.remove(client)
             except pickle.PickleError as e:
                 print(f"Serialization error: {e}")
 
+
     def handle_client(self, client, player_id) -> None:
         while True:
             try:
-                data = pickle.loads(client.recv(1024))
-                self.player_data[player_id] = data
-                self.broadcast()
+                data = pickle.loads(client.recv(4096))
+                if isinstance(data, dict):
+                    if data.get("type") == "bomb":
+                        print(f'Receive: {data}')
+                        bomb_data = {
+                            "type": "bomb",
+                            "position": data["position"],
+                            "player_id": data["player_id"],
+                            "planted": data["planted"],
+                        }
+                        self.broadcast(bomb_data)
+                    elif data.get("type") == "player_update":
+                        self.player_data[player_id] = {
+                            "position": data["position"],
+                            "direction": data["direction"]
+                        }
+                        data = {
+                            "type": "player_data",
+                            "players": self.player_data
+                        }
+                        self.broadcast(data)
+                else:
+                    print(f"Unexpected data format received: {data}")
             except (EOFError, ConnectionResetError) as e:
                 print(f"Client {player_id} disconnected: {e}")
                 self.clients.remove(client)
@@ -42,8 +66,10 @@ class Server:
             except pickle.UnpicklingError as e:
                 print(f"Failed to decode data from client {player_id}: {e}")
             except KeyError as e:
-                print(f"Invalid player ID {player_id}: {e}")
+                print(f"Invalid data received from client {player_id}: {e}")
                 break
+
+
 
     def run(self) -> None:
         print("Server running...")

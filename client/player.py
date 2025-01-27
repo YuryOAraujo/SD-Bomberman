@@ -143,6 +143,7 @@ class Player(pygame.sprite.Sprite):
         self.bombs_placed = 0
 
     def eliminate(self):
-        #Needs to implement logic to remove the player from the round
         self.eliminated = True
+        self.moving = False
+
         

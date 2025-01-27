@@ -4,7 +4,7 @@ from constants import *
 from spritesheet import SpriteSheet
 
 class Bomb(pygame.sprite.Sprite):
-    def __init__(self, x, y, player_id, player, timer=1):
+    def __init__(self, x, y, player_id, player=None, timer=1):
         super().__init__()
         self.player_id = player_id
         self.player = player

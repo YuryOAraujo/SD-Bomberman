@@ -5,6 +5,7 @@ from constants import *
 from player import Player
 from map import Map
 from threading import Thread
+from bomb import Bomb
 import time
 
 player_positions = [
@@ -32,6 +33,7 @@ class Game:
         self.player_id = None
         self.player_data = []
         self.map = None
+        self.last_position = (0, 0)
 
         self.round_active = False
         self.elapsed_rounds = 0
@@ -45,7 +47,7 @@ class Game:
         try:
             self.client.connect((self.server_host, self.server_port))
 
-            self.player_id = pickle.loads(self.client.recv(1024))
+            self.player_id = pickle.loads(self.client.recv(4096))
             print(f"Connected to server as Player {self.player_id}")
 
             self.map = Map(pickle.loads(self.client.recv(4096)))
@@ -64,23 +66,74 @@ class Game:
     def listen_for_updates(self) -> None:
         while True:
             try:
-                self.player_data = pickle.loads(self.client.recv(1024))
+                data = pickle.loads(self.client.recv(4096))
+                
+                if isinstance(data, dict) and "type" in data:
+                    if data["type"] == "bomb":
+                        print(f'receive: {data}')
+                    if data["type"] == "player_data":
+                        self.player_data = data["players"]
+                    elif data["type"] == "bomb":
+                        self.add_bomb_from_data(data)
+                else:
+                    print(f"Unexpected data format received: {data}")
+
             except Exception as e:
                 print(f"Connection lost: {e}")
                 self.client.close()
                 exit()
 
+    def add_bomb_from_data(self, bomb_data):
+        bomb_position = bomb_data["position"]
+        owner_id = bomb_data["player_id"]
+        planted_time = bomb_data["planted"]  # Recebe o tempo de plantação
+
+        player = None
+        for p in self.players:
+            if p.player_id == owner_id:
+                player = p
+                break
+
+        #Verifica se a bomba já foi criada
+        for bomb in self.bombs:
+            if bomb.rect.topleft == bomb_position:
+                return
+
+        # Cria uma nova bomba com o tempo de plantação correto
+        bomb = Bomb(bomb_position[0], bomb_position[1], owner_id, player)
+        bomb.planted = planted_time  # Define o mesmo tempo de plantação enviado pelo servidor
+        self.bombs.add(bomb)
+
     def send_position_and_direction(self) -> None:
         try:
-            data = {
-                "position": self.local_player.rect.topleft,
-                "direction": self.local_player.direction,
-            }
-            self.client.send(pickle.dumps(data))
+            # Only send position update if player position has changed significantly
+            if abs(self.local_player.rect.x - self.last_position[0]) > 1 or abs(self.local_player.rect.y - self.last_position[1]) > 1:
+                data = {
+                    "type": "player_update",
+                    "position": self.local_player.rect.topleft,
+                    "direction": self.local_player.direction,
+                }
+                self.client.send(pickle.dumps(data))
+                self.last_position = self.local_player.rect.topleft  # Store the new position
         except Exception as e:
             print(f"Failed to send position: {e}")
             self.client.close()
             exit()
+
+    def send_bomb(self, bomb):
+        try:
+            data = {
+                "type": "bomb",
+                "position": bomb.rect.topleft,
+                "player_id": bomb.player_id,
+                "planted": bomb.planted,  # Adiciona o tempo de plantação
+            }
+            self.client.send(pickle.dumps(data))
+        except Exception as e:
+            print(f"Failed to send bomb data: {e}")
+            self.client.close()
+            exit()
+
 
     def reset_round(self) -> None:
         self.bombs.empty()
@@ -115,9 +168,11 @@ class Game:
 
                     #self.map.draw_map(self.screen)
 
-                    bomb = self.local_player.update(is_local_player=True, obstacles=self.map.osbtacles)
+                    bomb = self.local_player.update(is_local_player=True, obstacles=self.map.obstacles)
                     if bomb:
                         self.bombs.add(bomb)
+                        self.send_bomb(bomb)
+
                     
                     self.send_position_and_direction()
 
@@ -142,7 +197,7 @@ class Game:
                                             player.eliminate()
                                             last_eliminated_player = player
                                             print(f"Player {player.player_id} has been eliminated!")
-
+                    
                     self.bombs.draw(self.screen)
                     self.players.draw(self.screen)
 
