@@ -1,11 +1,12 @@
 from random import randint
-from grid_base import *
+from map.grid_base import *
 
 SPRITE_WIDTH = 16
 SPRITE_HEIGHT = 16
 SCALE = 3
 
 class MapManager:
+
     def __init__(self, stage_name):
         self.grid = GRID_BASE[stage_name]
         self.generate_boxes()

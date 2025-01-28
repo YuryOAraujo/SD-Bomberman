@@ -1,8 +1,8 @@
 import threading
 import time
-from network_server import NetworkServer
+from core.network_server import NetworkServer
 
-from map_manager import MapManager
+from map.map_manager import MapManager
 
 HOST = '127.0.0.1'
 PORT = 5555
@@ -87,6 +87,3 @@ class Server:
     def run(self):
         print("Server running...")
         self.network_manager.accept_connections(self.on_client_connect)
-
-if __name__ == "__main__":
-    Server().run()
