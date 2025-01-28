@@ -5,10 +5,19 @@ from bomb.bomb import Bomb
 
 class Player(pygame.sprite.Sprite):
 
+    """
+    Classe que representa um jogador no jogo. 
+    Gerencia a movimentação, animações, bombas e interações do jogador.
+    """
+
     def __init__(self, player_id: int, initial_position) -> None:
 
         """
-        Inicializa o jogador com um ID único e uma posição inicial.
+        Inicializa o jogador com um ID único e define seus atributos iniciais.
+
+        Args:
+            player_id (int): ID único do jogador.
+            initial_position (tuple): Posição inicial do jogador na tela como (x, y).
         """
 
         super().__init__()
@@ -40,9 +49,13 @@ class Player(pygame.sprite.Sprite):
 
         """
         Carrega as animações do jogador a partir de uma spritesheet.
+
+        Returns:
+            dict: Dicionário contendo as animações para cada direção 
+                (down, up, left, right).
         """
 
-        sprite_sheet = SpriteSheet(pygame.image.load("client/graphics/bomb_party_v3.png").convert_alpha())
+        sprite_sheet = SpriteSheet(pygame.image.load(PATH_SPRITES).convert_alpha())
         animations = {
             "down": [],
             "up": [],
@@ -66,8 +79,13 @@ class Player(pygame.sprite.Sprite):
     def place_bomb(self) -> Bomb:
 
         """
-        Coloca uma bomba na posição atual do jogador, se possível.
+        Coloca uma bomba na posição atual do jogador, se o limite de bombas permitir.
+
+        Returns:
+            Bomb: Instância de uma bomba posicionada na localização atual do jogador.
+            None: Caso o jogador já tenha colocado o número máximo de bombas.
         """
+
 
         if self.bombs_placed < self.max_bombs:
             bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
@@ -78,7 +96,9 @@ class Player(pygame.sprite.Sprite):
     def align_to_grid(self) -> None:
 
         """
-        Alinha o jogador ao grid mais próximo, facilitando o movimento e a colocação de bombas.
+        Alinha o jogador à célula mais próxima da grade, baseado no tamanho do sprite.
+
+        Esse alinhamento facilita movimentos precisos e a colocação de bombas.
         """
 
         cell_width = SCALE * SPRITE_WIDTH
@@ -95,7 +115,10 @@ class Player(pygame.sprite.Sprite):
     def handle_movement(self, keys) -> None:
 
         """
-        Processa a entrada do usuário para mover o jogador.
+        Processa o movimento do jogador com base nas teclas pressionadas.
+
+        Args:
+            keys (pygame.key.ScancodeWrapper): Estado atual de todas as teclas do teclado.
         """
 
         self.moving = False
@@ -120,7 +143,11 @@ class Player(pygame.sprite.Sprite):
     def handle_collision(self, obstacles) -> None:
 
         """
-        Verifica e resolve colisões com obstáculos.
+        Detecta e resolve colisões entre o jogador e obstáculos.
+
+        Args:
+            obstacles (list): Matriz de obstáculos no jogo, onde cada célula pode 
+                            conter um obstáculo ou `None`.
         """
 
         if obstacles is None:
@@ -141,7 +168,14 @@ class Player(pygame.sprite.Sprite):
     def player_input(self, obstacles=None) -> Bomb:
 
         """
-        Processa a entrada do jogador, incluindo movimento e colocação de bombas.
+        Processa as entradas do jogador, incluindo movimento e colocação de bombas.
+
+        Args:
+            obstacles (list, optional): Matriz de obstáculos no jogo. Padrão é `None`.
+
+        Returns:
+            Bomb: Retorna uma bomba caso tenha sido colocada pelo jogador.
+            None: Caso nenhuma bomba seja colocada.
         """
 
         keys = pygame.key.get_pressed()
@@ -168,7 +202,9 @@ class Player(pygame.sprite.Sprite):
     def update_animation(self) -> None:
 
         """
-        Atualiza a animação do jogador com base no estado de movimento.
+        Atualiza a animação do jogador com base no estado atual (movendo ou parado).
+
+        Troca os frames da animação de acordo com a direção e velocidade.
         """
 
         if self.moving:
@@ -183,6 +219,9 @@ class Player(pygame.sprite.Sprite):
         
         """
         Define a posição do jogador e atualiza o estado de movimento.
+
+        Args:
+            new_position (tuple): Nova posição do jogador como (x, y).
         """
 
         if self.rect.topleft != new_position:
@@ -194,7 +233,17 @@ class Player(pygame.sprite.Sprite):
     def update(self, is_local_player: bool = False, obstacles=None) -> Bomb:
 
         """
-        Atualiza o estado do jogador, incluindo entrada, animação e colisões.
+        Atualiza o estado do jogador, incluindo entrada do jogador local, animação 
+        e detecção de colisões.
+
+        Args:
+            is_local_player (bool, optional): Indica se o jogador é o jogador local.
+                                            Padrão é `False`.
+            obstacles (list, optional): Matriz de obstáculos no jogo. Padrão é `None`.
+
+        Returns:
+            Bomb: Retorna uma bomba caso tenha sido colocada pelo jogador local.
+            None: Caso nenhuma bomba seja colocada.
         """
 
         if is_local_player:
@@ -207,7 +256,7 @@ class Player(pygame.sprite.Sprite):
     def reset_bombs(self) -> None:
 
         """
-        Reseta o contador de bombas colocadas.
+        Reseta o contador de bombas colocadas pelo jogador, permitindo colocar novas bombas.
         """
 
         self.bombs_placed = 0
@@ -215,7 +264,7 @@ class Player(pygame.sprite.Sprite):
     def eliminate(self) -> None:
 
         """
-        Marca o jogador como eliminado e para o movimento.
+        Marca o jogador como eliminado e para qualquer movimento adicional.
         """
 
         self.eliminated = True

@@ -6,7 +6,23 @@ from math import floor
 
 class Bomb(pygame.sprite.Sprite):
 
+    """
+    Classe que representa uma bomba no jogo, responsável pela animação da bomba, explosão e cálculo do caminho da explosão.
+    """
+
     def __init__(self, x, y, player_id, player=None, timer=1, grid_size=(SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)):
+
+        """
+        Inicializa uma nova bomba.
+
+        Args:
+            x (int): Coordenada x inicial.
+            y (int): Coordenada y inicial.
+            player_id (int): ID do jogador que plantou a bomba.
+            player: Objeto do jogador associado à bomba.
+            timer (int): Tempo em segundos até a explosão da bomba.
+            grid_size (tuple): Tamanho de cada célula da grade jogável.
+        """
 
         super().__init__()
         self.player_id = player_id
@@ -32,9 +48,16 @@ class Bomb(pygame.sprite.Sprite):
     def align_to_grid(self, x, y):
 
         """
-        Ajusta as coordenadas (x, y) para o centro da célula da matriz mais próxima,
-        garantindo que a bomba seja colocada dentro dos limites da área jogável.
+        Ajusta as coordenadas (x, y) para o centro da célula da matriz mais próxima.
+
+        Args:
+            x (int): Coordenada x inicial.
+            y (int): Coordenada y inicial.
+
+        Returns:
+            tuple: Coordenadas ajustadas (x, y) na grade.
         """
+
         cell_width, cell_height = self.grid_size
 
         # Calcula o índice da célula mais próxima
@@ -42,8 +65,8 @@ class Bomb(pygame.sprite.Sprite):
         grid_y = round(y / cell_height) * cell_height
 
         # Garante que as coordenadas finais estejam dentro dos limites da área jogável
-        grid_x = max(0, min(grid_x, PLAYABLE_AREA + cell_width))
-        grid_y = max(0, min(grid_y, PLAYABLE_AREA + cell_height))
+        grid_x = max(0, min(grid_x, PLAYABLE_AREA_HEIGHT + cell_width))
+        grid_y = max(0, min(grid_y, PLAYABLE_AREA_HEIGHT + cell_height))
 
         return grid_x, grid_y
 
@@ -51,9 +74,12 @@ class Bomb(pygame.sprite.Sprite):
 
         """
         Carrega os sprites da bomba e das explosões.
+
+        Returns:
+            dict: Dicionário contendo as animações da bomba e explosões.
         """
 
-        sprite_sheet = SpriteSheet(pygame.image.load("client/graphics/bomb_party_v3.png").convert_alpha())
+        sprite_sheet = SpriteSheet(pygame.image.load(PATH_SPRITES).convert_alpha())
         return {
             "bomb": [
                 sprite_sheet.get_image(12, 2, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
@@ -79,7 +105,10 @@ class Bomb(pygame.sprite.Sprite):
     def should_explode(self) -> bool:
 
         """
-        Verifica se a bomba deve explodir com base no tempo de plantio.
+        Verifica se a bomba deve explodir com base no tempo decorrido desde que foi plantada.
+
+        Returns:
+            bool: Verdadeiro se o tempo decorrido for maior ou igual ao tempo do timer.
         """
 
         return time.time() - self.planted >= self.timer
@@ -88,6 +117,9 @@ class Bomb(pygame.sprite.Sprite):
 
         """
         Calcula o caminho da explosão a partir do centro da bomba.
+
+        Returns:
+            list: Lista de tuplas contendo as coordenadas de explosão e o tipo de sprite associado.
         """
 
         directions = {
@@ -116,10 +148,17 @@ class Bomb(pygame.sprite.Sprite):
     def valid_tile(self, x, y):
 
         """
-        Verifica se a posição está dentro do limite da área jogável.
+        Verifica se a posição está dentro dos limites da área jogável.
+
+        Args:
+            x (int): Coordenada x.
+            y (int): Coordenada y.
+
+        Returns:
+            bool: Verdadeiro se a posição for válida.
         """
 
-        return 0 <= x < PLAYABLE_AREA and 0 <= y < PLAYABLE_AREA
+        return 0 <= x < PLAYABLE_AREA_WIDTH and 0 <= y < PLAYABLE_AREA_HEIGHT
 
     def explode(self):
 
@@ -142,6 +181,14 @@ class Bomb(pygame.sprite.Sprite):
 
         """
         Retorna o sprite correto para a explosão com base na direção e posição.
+
+        Args:
+            direction (str): Direção da explosão (center, left, right, up, down ou path).
+            x (int): Coordenada x.
+            y (int): Coordenada y.
+
+        Returns:
+            pygame.Surface: Sprite da explosão correspondente.
         """
 
         if direction == "center":
@@ -176,6 +223,9 @@ class Bomb(pygame.sprite.Sprite):
 
         """
         Atualiza a animação da explosão e desenha os sprites na tela.
+
+        Args:
+            surface (pygame.Surface): Superfície onde os sprites serão desenhados.
         """
 
         self.flicker_timer += 1
@@ -193,7 +243,7 @@ class Bomb(pygame.sprite.Sprite):
     def check_explosion_end(self):
 
         """
-        Verifica se a explosão terminou e remove a bomba.
+        Verifica se a explosão terminou e remove a bomba do jogo.
         """
 
         if time.time() - self.planted >= self.timer + 1:
@@ -203,7 +253,10 @@ class Bomb(pygame.sprite.Sprite):
     def update(self, surface):
 
         """
-        Atualiza a animação da bomba ou da explosão.
+        Atualiza a animação da bomba ou da explosão com base no estado atual.
+
+        Args:
+            surface (pygame.Surface): Superfície onde os sprites serão desenhados.
         """
 
         if not self.exploding:

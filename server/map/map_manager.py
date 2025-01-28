@@ -1,9 +1,7 @@
 from random import randint
-from map.grid_base import *
+from .grid_base import *
 
-SPRITE_WIDTH = 16
-SPRITE_HEIGHT = 16
-SCALE = 3
+from config.constants import *
 
 class MapManager:
 

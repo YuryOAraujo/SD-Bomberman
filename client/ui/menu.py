@@ -1,8 +1,12 @@
 import pygame
 import sys
 
+from config.constants import *
+
 class Menu:
+
     def __init__(self):
+        
         # Inicialização do Pygame
         pygame.init()
 
@@ -28,10 +32,10 @@ class Menu:
         self.menu_positions = []
 
         # Valores padrão para IP e porta
-        self.default_ip = "127.0.0.1"  # IP padrão
-        self.default_port = "5555"    # Porta padrão
+        self.default_ip = SERVER_IP  # IP padrão
+        self.default_port = SERVER_PORT   # Porta padrão
 
-        self.background_image = pygame.image.load("E:/T.S.I/Estagio/SIte_IF_AVE/SD-Bomberman/client/graphics/Fundo.png")
+        self.background_image = pygame.image.load(PATH_BACKGROUND)
         self.background_image = pygame.transform.scale(self.background_image, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
     def draw_text(self, text, font, color, center):
