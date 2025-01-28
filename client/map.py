@@ -2,12 +2,14 @@ import pygame
 from spritesheet import SpriteSheet
 from constants import *
 
-
 class Map:
+
     def __init__(self, grid) -> None:
         self.grid = grid
         self.animations = self.load_animation_map()
         self.obstacles = [[], []]
+        self.static_map_surface = pygame.Surface((WIDTH, HEIGHT))
+        self.draw_static_map()
 
     @staticmethod
     def load_animation_map() -> dict:
@@ -21,28 +23,44 @@ class Map:
 
         return animations
 
-    def draw_map(self, screen, offset_x=0) -> list:
-        """
-        Desenha o mapa na tela.
+    def update_obstacles(self):
 
-        :param screen: Superfície do Pygame onde o mapa será desenhado.
-        :param offset_x: Deslocamento horizontal (largura da interface).
-        :return: Lista de obstáculos.
-        """
+        """Atualiza a lista de obstáculos com base no grid atual."""
+        self.obstacles = [[], []]  # Limpa a lista de obstáculos
+
         for row in range(len(self.grid)):
             for col in range(len(self.grid[row])):
-                # Aplica o deslocamento horizontal (offset_x) às coordenadas x
-                x = col * SPRITE_WIDTH * SCALE + offset_x
+                x = col * SPRITE_WIDTH * SCALE
+                y = row * SPRITE_HEIGHT * SCALE
+
+                if self.grid[row][col] == 1:  # Bloco indestrutível
+                    block_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
+                    self.obstacles[0].append(block_rect)
+                elif self.grid[row][col] == 2:  # Caixa destrutível
+                    boxes_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
+                    self.obstacles[1].append(boxes_rect)
+        
+    def draw_static_map(self):
+
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[row])):
+                x = col * SPRITE_WIDTH * SCALE
                 y = row * SPRITE_HEIGHT * SCALE
 
                 if self.grid[row][col] == 0:
-                    screen.blit(self.animations["grass"], (x, y))
+                    self.static_map_surface.blit(self.animations["grass"], (x, y))
                 elif self.grid[row][col] == 1:
                     block_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
                     self.obstacles[0].append(block_rect)
-                    screen.blit(self.animations["block"], (x, y))
+                    self.static_map_surface.blit(self.animations["block"], (x, y))
                 elif self.grid[row][col] == 2:
                     boxes_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
                     self.obstacles[1].append(boxes_rect)
-                    screen.blit(self.animations["box"], (x, y))
+                    self.static_map_surface.blit(self.animations["box"], (x, y))
+        
+        # Atualiza a lista de obstáculos
+        self.update_obstacles()
+
+    def draw_map(self, screen, offset_x=0):
+        screen.blit(self.static_map_surface, (offset_x, 0))
         return self.obstacles
