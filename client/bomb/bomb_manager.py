@@ -1,5 +1,5 @@
 import pygame
-from bomb import Bomb
+from bomb.bomb import Bomb
 
 class BombManager:
     def __init__(self, players):

@@ -1,7 +1,7 @@
 import pygame
-from constants import *
-from spritesheet import SpriteSheet
-from bomb import Bomb
+from config.constants import *
+from utils.spritesheet import SpriteSheet
+from bomb.bomb import Bomb
 
 class Player(pygame.sprite.Sprite):
 

@@ -1,15 +1,14 @@
 import pygame
-import socket
 import pickle
-from constants import *
-from player import Player
-from map import Map
+from config.constants import *
+from player.player import Player
+from utils.map import Map
 from threading import Thread
-from bomb import Bomb
+from bomb.bomb import Bomb
 
-from network_client import NetworkClient
-from player_manager import PlayerManager
-from bomb_manager import BombManager
+from core.network_client import NetworkClient
+from player.player_manager import PlayerManager
+from bomb.bomb_manager import BombManager
 
 player_positions = [
     (48, 48),
@@ -141,6 +140,3 @@ class Game:
 
                     pygame.display.update()
                     self.clock.tick(FPS)
-
-if __name__ == "__main__":
-    Game().run()

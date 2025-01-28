@@ -84,7 +84,7 @@ class Menu:
                         if self.selected_item == 0:
                             ip, port = self.connection_screen()
                             if ip and port:
-                                from game import Game  # Importe aqui para evitar loops de importação
+                                from client.core.game import Game  # Importe aqui para evitar loops de importação
                                 game = Game(ip, int(port))
                                 game.run()
                         elif self.selected_item == 1:
@@ -102,7 +102,7 @@ class Menu:
                         if self.selected_item == 0:
                             ip, port = self.connection_screen()
                             if ip and port:
-                                from game import Game 
+                                from client.core.game import Game 
                                 game = Game(ip, int(port))
                                 game.run()
                         elif self.selected_item == 1:

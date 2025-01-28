@@ -1,7 +1,7 @@
 import pygame
 import time
-from constants import *
-from spritesheet import SpriteSheet
+from config.constants import *
+from utils.spritesheet import SpriteSheet
 from math import floor
 
 class Bomb(pygame.sprite.Sprite):

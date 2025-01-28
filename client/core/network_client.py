@@ -1,6 +1,6 @@
 import socket
 import pickle
-from constants import *
+from config.constants import *
 
 class NetworkClient:
     

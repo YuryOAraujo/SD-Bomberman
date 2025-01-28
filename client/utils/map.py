@@ -1,6 +1,6 @@
 import pygame
-from spritesheet import SpriteSheet
-from constants import *
+from utils.spritesheet import SpriteSheet
+from config.constants import *
 
 class Map:
 

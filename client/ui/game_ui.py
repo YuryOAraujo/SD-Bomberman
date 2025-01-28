@@ -1,5 +1,5 @@
 import pygame
-from constants import HEIGHT
+from config.constants import HEIGHT
 
 # Cores (defina conforme necessário)
 WHITE = (255, 255, 255)

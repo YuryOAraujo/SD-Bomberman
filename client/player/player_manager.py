@@ -1,5 +1,5 @@
 import pygame
-from player import Player
+from player.player import Player
 
 player_positions = [
     (48, 48),
