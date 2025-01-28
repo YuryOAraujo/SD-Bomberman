@@ -1,12 +1,14 @@
 import pygame
-from constants import HEIGHT
+from config.constants import *
 
 # Cores (defina conforme necessário)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 class GameUI:
+
     def __init__(self, screen, players, ui_width, map_width, player_images):
+
         """
         Inicializa a interface do usuário do jogo.
 
@@ -16,28 +18,41 @@ class GameUI:
         :param map_width: Largura do mapa (para calcular o deslocamento da interface).
         :param player_images: Lista de imagens dos personagens virados para frente.
         """
+
         self.screen = screen
         self.players = players
         self.ui_width = ui_width
         self.map_width = map_width
-        self.player_images = player_images  # Imagens dos personagens virados para frente
-        self.font = pygame.font.Font(None, 36)  # Fonte para texto
+
+         # Imagens dos personagens virados para frente
+        self.player_images = player_images 
+
+        # Fonte para texto
+        self.font = pygame.font.Font(None, 36)  
 
         # Carrega a imagem do coração (vida)
         try:
-            self.heart_image = pygame.image.load("E:/T.S.I/Estagio/SIte_IF_AVE/SD-Bomberman/client/graphics/heart.png").convert_alpha()
-            self.heart_image = pygame.transform.scale(self.heart_image, (32, 32))  # Redimensiona para 32x32 pixels
+            self.heart_image = pygame.image.load(PATH_ICON_HEART).convert_alpha()
+
+             # Redimensiona para 32x32 pixels
+            self.heart_image = pygame.transform.scale(self.heart_image, (32, 32)) 
         except FileNotFoundError:
             print("Erro: Arquivo 'heart.png' não encontrado. Usando fallback.")
-            self.heart_image = pygame.Surface((32, 32))  # Fallback: superfície vazia
-            self.heart_image.fill((255, 0, 0))  # Preenche com vermelho
+
+            # Fallback: superfície vazia
+            self.heart_image = pygame.Surface((32, 32))  
+
+            # Preenche com vermelho
+            self.heart_image.fill((255, 0, 0))  
 
     def draw(self, time_left):
+
         """
         Desenha a interface do usuário na tela.
 
         :param time_left: Tempo restante para o fim do jogo.
         """
+
         # Define a cor de fundo da interface (cinza médio)
         interface_bg_color = (169, 169, 169)
         pygame.draw.rect(self.screen, interface_bg_color, (self.map_width, 0, self.ui_width, HEIGHT))
@@ -48,6 +63,7 @@ class GameUI:
 
         # Desenhar as fotos e a vida dos personagens
         for i, player in enumerate(self.players):
+
             # Posição base para cada jogador
             base_x = self.map_width + 10  # Margem à esquerda da interface
             base_y = 50 + i * 100  # Espaçamento vertical entre os jogadores
