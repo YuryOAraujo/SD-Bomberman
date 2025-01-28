@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
         # Atributos relacionados a bombas
         self.bombs_placed = 0
         self.max_bombs = 1
-        self.explosion_range = 2
+        self.explosion_range = 1
 
         # Estado do jogador
         self.eliminated = False
