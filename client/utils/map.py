@@ -24,6 +24,7 @@ class Map:
                         - 0: Chão (livre de obstáculos)
                         - 1: Bloco indestrutível
                         - 2: Caixa destrutível
+            stage_name (str): Nome do estágio do mapa (e.g., "Stage 1", "Stage 2").
         """
 
         self.grid = grid
