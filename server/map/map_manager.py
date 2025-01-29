@@ -6,6 +6,7 @@ from config.constants import *
 class MapManager:
 
     def __init__(self, stage_name):
+        self.stage_name = stage_name
         self.grid = GRID_BASE[stage_name]
         self.generate_boxes()
 
@@ -43,3 +44,7 @@ class MapManager:
     def get_grid(self):
         """Retorna o estado atual do mapa."""
         return self.grid
+    
+    def get_stage(self):
+        """Retorna o nome do estágio atual."""
+        return self.stage_name

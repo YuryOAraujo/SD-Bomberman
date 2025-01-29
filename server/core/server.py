@@ -1,5 +1,6 @@
 import threading
 import time
+import random
 from core.network_server import NetworkServer
 
 from map.map_manager import MapManager
@@ -29,7 +30,7 @@ class Server:
         """
 
         self.network_manager = NetworkServer(HOST, PORT, MAX_PLAYERS)
-        self.map_manager = MapManager("Stage 1")
+        self.map_manager = MapManager(random.choice(STAGES))
         self.player_data = [{"position": (48, 48), "direction": "down"} for _ in range(MAX_PLAYERS)]
         self.bombs = []  
         self.bomb_lock = threading.Lock()
@@ -132,7 +133,7 @@ class Server:
         """
 
         self.network_manager.send_data(client, player_id)
-        self.network_manager.send_data(client, self.map_manager.get_grid())
+        self.network_manager.send_data(client, (self.map_manager.get_grid(), self.map_manager.get_stage()))
         threading.Thread(target=self.handle_client, args=(client, player_id)).start()
 
     def run(self):

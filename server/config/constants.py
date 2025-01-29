@@ -33,3 +33,6 @@ DATA_TYPE_GRID_UPDATE = "grid_update"
 
 # Usado para enviar/receber dados gerais sobre o jogador, como nome, ID ou estado atual.
 DATA_TYPE_PLAYER_DATA = "player_data"  
+
+# Constante para definir os tipos de terreno no mapa
+STAGES = ("Stage 1", "Stage 2")

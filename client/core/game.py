@@ -73,7 +73,7 @@ class Game:
         """
                 
         if self.network_client.connect():
-            self.map = Map(pickle.loads(self.network_client.client.recv(4096)))
+            self.map = Map(*pickle.loads(self.network_client.client.recv(4096)))
             self.player_manager.initialize_players()
             Thread(target=self.listen_for_updates, daemon=True).start()
         else:

@@ -11,7 +11,7 @@ class Map:
     obstáculos com base em um grid.
     """
 
-    def __init__(self, grid) -> None:
+    def __init__(self, grid, stage_name) -> None:
 
         """
         Inicializa a classe `Map` com o grid e configurações iniciais.
@@ -21,34 +21,42 @@ class Map:
                         contém um valor indicando o tipo de terreno ou obstáculo.
                         Valores possíveis:
 
-                        - 0: Grama (livre de obstáculos)
+                        - 0: Chão (livre de obstáculos)
                         - 1: Bloco indestrutível
                         - 2: Caixa destrutível
         """
 
         self.grid = grid
-        self.animations = self.load_animation_map()
+        self.stage_name = stage_name
+        self.animations = self.load_animation_map(self)
         self.obstacles = [[], []]
         self.static_map_surface = pygame.Surface((WIDTH, HEIGHT))
         self.draw_static_map()
 
     @staticmethod
-    def load_animation_map() -> dict:
+    def load_animation_map(self) -> dict:
 
         """
         Carrega os sprites necessários para o mapa a partir de uma spritesheet.
 
         Returns:
             dict: Dicionário contendo os sprites de cada elemento do mapa, onde as 
-                chaves são os nomes dos elementos (e.g., "grass", "box", "block") e 
+                chaves são os nomes dos elementos (e.g., "floor", "box", "block") e 
                 os valores são as superfícies correspondentes.
         """
 
         sprite_sheet = SpriteSheet(pygame.image.load(PATH_SPRITES).convert_alpha())
 
+        stage_mapping = {
+            "Stage 1": {"floor": 1, "box": 10},
+            "Stage 2": {"floor": 4, "box": 9},
+        }
+
+        stage_data = stage_mapping[self.stage_name]
+
         animations = {
-            "grass": sprite_sheet.get_image(1, 0, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
-            "box": sprite_sheet.get_image(10, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
+            "floor": sprite_sheet.get_image(stage_data['floor'], 0, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
+            "box": sprite_sheet.get_image(stage_data['box'], 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
             "block": sprite_sheet.get_image(11, 4, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK)
         }
 
@@ -101,7 +109,7 @@ class Map:
                 y = row * SPRITE_HEIGHT * SCALE
 
                 if self.grid[row][col] == 0:
-                    self.static_map_surface.blit(self.animations["grass"], (x, y))
+                    self.static_map_surface.blit(self.animations["floor"], (x, y))
                 elif self.grid[row][col] == 1:
                     block_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
                     self.obstacles[0].append(block_rect)
