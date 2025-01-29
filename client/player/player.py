@@ -121,6 +121,9 @@ class Player(pygame.sprite.Sprite):
             keys (pygame.key.ScancodeWrapper): Estado atual de todas as teclas do teclado.
         """
 
+        if self.eliminated:
+            return
+        
         self.moving = False
 
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.rect.left > 0:
@@ -206,6 +209,11 @@ class Player(pygame.sprite.Sprite):
 
         Troca os frames da animação de acordo com a direção e velocidade.
         """
+
+        if self.eliminated:
+            self.image = pygame.Surface((0, 0))
+            self.direction = 'down'
+            return
 
         if self.moving:
             self.frame_index += self.animation_speed
