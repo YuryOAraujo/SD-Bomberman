@@ -120,9 +120,6 @@ class Player(pygame.sprite.Sprite):
         Args:
             keys (pygame.key.ScancodeWrapper): Estado atual de todas as teclas do teclado.
         """
-
-        if self.eliminated:
-            return
         
         self.moving = False
 
@@ -180,6 +177,9 @@ class Player(pygame.sprite.Sprite):
             Bomb: Retorna uma bomba caso tenha sido colocada pelo jogador.
             None: Caso nenhuma bomba seja colocada.
         """
+
+        if self.eliminated:
+            return
 
         keys = pygame.key.get_pressed()
         prev_direction = self.direction
