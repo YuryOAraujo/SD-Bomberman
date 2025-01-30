@@ -37,9 +37,12 @@ class Menu:
 
         self.background_image = pygame.image.load(PATH_BACKGROUND)
         self.background_image = pygame.transform.scale(self.background_image, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        self.default_port = str(SERVER_PORT)
 
     def draw_text(self, text, font, color, center):
         """Desenha um texto centralizado."""
+        if not isinstance(text, str):  # Garantir que o texto seja uma string
+            text = str(text)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=center)
         self.screen.blit(text_surface, text_rect)
@@ -88,9 +91,12 @@ class Menu:
                         if self.selected_item == 0:
                             ip, port = self.connection_screen()
                             if ip and port:
-                                from client.core.game import Game  # Importe aqui para evitar loops de importação
+                                from core.game import Game  # Importe aqui para evitar loops de importação
                                 game = Game(ip, int(port))
                                 game.run()
+                                pygame.quit()  # Encerra o Pygame após o jogo terminar
+                                pygame.init()  # Reinicia o Pygame para o menu
+                                self.__init__()  # Reinicia o menu
                         elif self.selected_item == 1:
                             self.credits_screen()
                         elif self.selected_item == 2:
@@ -106,9 +112,12 @@ class Menu:
                         if self.selected_item == 0:
                             ip, port = self.connection_screen()
                             if ip and port:
-                                from client.core.game import Game 
+                                from core.game import Game 
                                 game = Game(ip, int(port))
                                 game.run()
+                                pygame.quit()  # Encerra o Pygame após o jogo terminar
+                                pygame.init()  # Reinicia o Pygame para o menu
+                                self.__init__()  # Reinicia o menu
                         elif self.selected_item == 1:
                             self.credits_screen()
                         elif self.selected_item == 2:
@@ -121,7 +130,7 @@ class Menu:
     def connection_screen(self):
         """Tela para digitar IP e porta."""
         ip = self.default_ip  # Usar o IP padrão
-        port = self.default_port  # Usar a porta padrão
+        port = self.default_port  # Usar a porta padrão (já é uma string)
         active_input = None  # Campo de entrada ativo: "ip" ou "port"
         while True:
             for event in pygame.event.get():
@@ -131,7 +140,7 @@ class Menu:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         if ip and port:
-                            return ip, port
+                            return ip, port  # Retorna IP e porta
                     elif event.key == pygame.K_BACKSPACE:
                         if active_input == "ip":
                             ip = ip[:-1]
@@ -173,9 +182,9 @@ class Menu:
             pygame.draw.rect(self.screen, self.BLUE if active_input == "ip" else self.WHITE, ip_box, 2)
             pygame.draw.rect(self.screen, self.BLUE if active_input == "port" else self.WHITE, port_box, 2)
 
-            # Exibir texto digitado
-            self.draw_text(ip, self.small_font, self.WHITE, ip_box.center)
-            self.draw_text(port, self.small_font, self.WHITE, port_box.center)
+            # Exibir texto digitado (garantir que sejam strings)
+            self.draw_text(str(ip), self.small_font, self.WHITE, ip_box.center)
+            self.draw_text(str(port), self.small_font, self.WHITE, port_box.center)
 
             # Botão para confirmar
             confirm_button = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 350, 200, 50)

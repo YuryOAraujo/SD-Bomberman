@@ -9,6 +9,7 @@ from bomb.bomb import Bomb
 from core.network_client import NetworkClient
 from player.player_manager import PlayerManager
 from bomb.bomb_manager import BombManager
+from ui.game_ui import GameUI
 
 player_positions = [
     (48, 48),
@@ -44,7 +45,7 @@ class Game:
     def __init__(self, ip=SERVER_IP, port=SERVER_PORT):
 
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((TOTAL_WIDTH, TOTAL_HEIGHT))  # Usa WIDTH e HEIGHT atualizados
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.game_active = True
@@ -62,6 +63,7 @@ class Game:
         self.game_over = False
 
         self.last_position = (0, 0)
+        self.time_left = 180 
 
         self.connect_to_server()
 
@@ -140,16 +142,19 @@ class Game:
         self.player_manager.reset_players()
 
     def run(self):
-
         """
         Loop principal do jogo, que gerencia o estado do jogo, desenha na tela,
         processa eventos e controla o fluxo de rodadas e vitórias.
         """
 
-        while self.game_active:
+        # Inicializa a GameUI
+        game_ui = GameUI(self.screen, self.player_manager.players, UI_WIDTH, WIDTH, "assets/icons/trophy.png")
 
+        # Tempo inicial do jogo
+        start_time = pygame.time.get_ticks()  # Tempo inicial em milissegundos
+
+        while self.game_active:
             if not self.game_over:
-                
                 # Configura o início de uma nova rodada
                 print(f'Current round: {self.elapsed_rounds}')
                 self.round_active = True
@@ -165,30 +170,45 @@ class Game:
                         break
 
                 while self.round_active:
-                    
                     self.screen.fill(WHITE)
 
-                    # Desenha o mapa
+                    # Desenha o mapa na parte esquerda da tela
                     self.map.draw_map(self.screen)
 
+                    # Atualiza o tempo restante
+                    current_time = pygame.time.get_ticks()  # Tempo atual em milissegundos
+                    elapsed_time = (current_time - start_time) // 1000  # Tempo decorrido em segundos
+                    self.time_left = max(0, 180 - elapsed_time)  # Atualiza o tempo restante
+
+                    # Desenha a interface na parte direita da tela
+                    game_ui.draw(self.time_left)  # Passa o tempo restante
+
+                    # Processa eventos
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             pygame.quit()
-                            exit()
+                            return  # Retorna ao menu
 
+                    # Atualiza o jogador local e verifica se uma bomba foi colocada
                     bomb = self.player_manager.local_player.update(is_local_player=True, obstacles=self.map.obstacles)
                     if bomb:
                         self.bomb_manager.bombs.add(bomb)
                         self.send_bomb(bomb)
 
+                    # Envia a posição e direção do jogador local
                     self.send_position_and_direction()
+
+                    # Atualiza os jogadores
                     self.player_manager.update_players()
 
+                    # Atualiza as bombas e verifica se algum jogador foi eliminado
                     last_eliminated_player = self.bomb_manager.update_bombs(self.screen)
 
+                    # Desenha as bombas e os jogadores
                     self.bomb_manager.bombs.draw(self.screen)
                     self.player_manager.players.draw(self.screen)
 
+                    # Verifica se há apenas um jogador vivo
                     alive_players = [player for player in self.player_manager.players if not player.eliminated]
 
                     if len(alive_players) <= 1:
