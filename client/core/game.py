@@ -68,7 +68,6 @@ class Game:
         self.font = pygame.font.Font(None, 36)  # Adiciona a fonte
 
         self.last_position = (0, 0)
-        self.time_left = 180 
 
         self.connect_to_server()
 
@@ -251,9 +250,6 @@ class Game:
         # Inicializa a GameUI
         game_ui = GameUI(self.screen, self.player_manager.players, UI_WIDTH, WIDTH, "assets/icons/trophy.png")
 
-        # Tempo inicial do jogo
-        start_time = pygame.time.get_ticks()  # Tempo inicial em milissegundos
-
         while self.game_active:
             if not self.game_over:
                 # Configura o início de uma nova rodada
@@ -276,13 +272,8 @@ class Game:
                     # Desenha o mapa na parte esquerda da tela
                     self.map.draw_map(self.screen)
 
-                    # Atualiza o tempo restante
-                    current_time = pygame.time.get_ticks()  # Tempo atual em milissegundos
-                    elapsed_time = (current_time - start_time) // 1000  # Tempo decorrido em segundos
-                    self.time_left = max(0, 180 - elapsed_time)  # Atualiza o tempo restante
-
                     # Desenha a interface na parte direita da tela
-                    game_ui.draw(self.time_left)  # Passa o tempo restante
+                    game_ui.draw()  # Agora não precisa mais passar o tempo
 
                     # Processa eventos
                     for event in pygame.event.get():

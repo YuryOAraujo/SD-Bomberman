@@ -6,7 +6,7 @@ WIDTH = 720
 # Altura da janela do jogo
 HEIGHT = 624  
 
-UI_WIDTH = 180  # Largura da interface
+UI_WIDTH = 350  # Largura da interface
 UI_HEIGHT = HEIGHT  # A interface tem a mesma altura do mapa
 
 TOTAL_WIDTH = UI_WIDTH + WIDTH
