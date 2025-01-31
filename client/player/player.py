@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
     Gerencia a movimentação, animações, bombas e interações do jogador.
     """
 
-    def __init__(self, player_id: int, initial_position) -> None:
+    def __init__(self, player_id: int, initial_position, name: str = "P1") -> None:
 
         """
         Inicializa o jogador com um ID único e define seus atributos iniciais.
@@ -35,6 +35,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 1  
         self.animation_speed = 0.15 
         self.moving = False 
+        self.name = name
 
         # Atributos relacionados a bombas
         self.bombs_placed = 0

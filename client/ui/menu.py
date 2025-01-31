@@ -89,14 +89,15 @@ class Menu:
                         self.selected_item = (self.selected_item + 1) % len(self.menu_items)  # Navegar para baixo
                     elif event.key == pygame.K_RETURN:
                         if self.selected_item == 0:
-                            ip, port = self.connection_screen()
-                            if ip and port:
-                                from core.game import Game  # Importe aqui para evitar loops de importação
+                            ip, port, name = self.connection_screen()
+                            if ip and port and name:
+                                from core.game import Game
                                 game = Game(ip, int(port))
+                                game.player_manager.local_player.name = name  # Define o nome do jogador local
                                 game.run()
-                                pygame.quit()  # Encerra o Pygame após o jogo terminar
-                                pygame.init()  # Reinicia o Pygame para o menu
-                                self.__init__()  # Reinicia o menu
+                                pygame.quit()
+                                pygame.init()
+                                self.__init__()
                         elif self.selected_item == 1:
                             self.credits_screen()
                         elif self.selected_item == 2:
@@ -110,14 +111,15 @@ class Menu:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if self.selected_item == 0:
-                            ip, port = self.connection_screen()
-                            if ip and port:
-                                from core.game import Game 
+                            ip, port, name = self.connection_screen()
+                            if ip and port and name:
+                                from core.game import Game
                                 game = Game(ip, int(port))
+                                game.player_manager.local_player.name = name  # Define o nome do jogador local
                                 game.run()
-                                pygame.quit()  # Encerra o Pygame após o jogo terminar
-                                pygame.init()  # Reinicia o Pygame para o menu
-                                self.__init__()  # Reinicia o menu
+                                pygame.quit()
+                                pygame.init()
+                                self.__init__()
                         elif self.selected_item == 1:
                             self.credits_screen()
                         elif self.selected_item == 2:
@@ -128,10 +130,11 @@ class Menu:
             pygame.display.flip()
 
     def connection_screen(self):
-        """Tela para digitar IP e porta."""
+        """Tela para digitar IP, porta e nome do personagem."""
         ip = self.default_ip  # Usar o IP padrão
         port = self.default_port  # Usar a porta padrão (já é uma string)
-        active_input = None  # Campo de entrada ativo: "ip" ou "port"
+        name = ""  # Nome do personagem
+        active_input = None  # Campo de entrada ativo: "ip", "port" ou "name"
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -139,13 +142,15 @@ class Menu:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        if ip and port:
-                            return ip, port  # Retorna IP e porta
+                        if ip and port and name:
+                            return ip, port, name  # Retorna IP, porta e nome
                     elif event.key == pygame.K_BACKSPACE:
                         if active_input == "ip":
                             ip = ip[:-1]
                         elif active_input == "port":
                             port = port[:-1]
+                        elif active_input == "name":
+                            name = name[:-1]
                     else:
                         if active_input == "ip":
                             # Permitir apenas números e pontos
@@ -155,17 +160,23 @@ class Menu:
                             # Permitir apenas números
                             if event.unicode.isdigit():
                                 port += event.unicode
+                        elif active_input == "name":
+                            # Permitir apenas letras e limitar a 3 caracteres
+                            if event.unicode.isalpha() and len(name) < 3:
+                                name += event.unicode.upper()  # Converter para maiúsculas
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Clique esquerdo
                         if ip_box.collidepoint(event.pos):
                             active_input = "ip"
                         elif port_box.collidepoint(event.pos):
                             active_input = "port"
+                        elif name_box.collidepoint(event.pos):
+                            active_input = "name"
                         elif confirm_button.collidepoint(event.pos):
-                            if ip and port:
-                                return ip, port  # Confirmar valores e retornar
+                            if ip and port and name:
+                                return ip, port, name  # Confirmar valores e retornar
                         elif back_button.collidepoint(event.pos):
-                            return None, None  # Voltar ao menu principal
+                            return None, None, None  # Voltar ao menu principal
 
             # Desenhar a tela
             self.screen.fill(self.GRAY)
@@ -174,25 +185,29 @@ class Menu:
             self.draw_text("Enter Server Details", self.font, self.WHITE, (self.SCREEN_WIDTH // 2, 100))
             self.draw_text("IP Address:", self.small_font, self.WHITE, (self.SCREEN_WIDTH // 2 - 200, 200))
             self.draw_text("Port:", self.small_font, self.WHITE, (self.SCREEN_WIDTH // 2 - 200, 300))
+            self.draw_text("Name (3 letters):", self.small_font, self.WHITE, (self.SCREEN_WIDTH // 2 - 200, 400))
 
-            # Retângulos para entrada de IP e porta
+            # Retângulos para entrada de IP, porta e nome
             ip_box = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 180, 300, 40)
             port_box = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 280, 300, 40)
+            name_box = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 380, 300, 40)
 
             pygame.draw.rect(self.screen, self.BLUE if active_input == "ip" else self.WHITE, ip_box, 2)
             pygame.draw.rect(self.screen, self.BLUE if active_input == "port" else self.WHITE, port_box, 2)
+            pygame.draw.rect(self.screen, self.BLUE if active_input == "name" else self.WHITE, name_box, 2)
 
             # Exibir texto digitado (garantir que sejam strings)
             self.draw_text(str(ip), self.small_font, self.WHITE, ip_box.center)
             self.draw_text(str(port), self.small_font, self.WHITE, port_box.center)
+            self.draw_text(str(name), self.small_font, self.WHITE, name_box.center)
 
             # Botão para confirmar
-            confirm_button = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 350, 200, 50)
+            confirm_button = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 450, 200, 50)
             pygame.draw.rect(self.screen, self.WHITE, confirm_button)
             self.draw_text("Confirm", self.small_font, self.BLACK, confirm_button.center)
 
             # Botão para voltar
-            back_button = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 450, 200, 50)
+            back_button = pygame.Rect(self.SCREEN_WIDTH // 2 - 100, 550, 200, 50)
             pygame.draw.rect(self.screen, self.WHITE, back_button)
             self.draw_text("Back", self.small_font, self.BLACK, back_button.center)
 

@@ -22,24 +22,14 @@ class GameUI:
 
         # Carrega a imagem do troféu
         try:
-            self.trophy_image = pygame.image.load(trophy_image_path).convert_alpha()
+            self.trophy_image = pygame.image.load("client/assets/icons/trofeu.png").convert_alpha()
             self.trophy_image = pygame.transform.scale(self.trophy_image, (32, 32))  # Redimensiona para 32x32 pixels
         except FileNotFoundError:
-            print("Erro: Arquivo do troféu não encontrado. Usando fallback.")
             self.trophy_image = pygame.Surface((32, 32))  # Fallback: superfície vazia
             self.trophy_image.fill((255, 215, 0))  # Preenche com cor dourada
 
         # Fonte para texto
         self.font = pygame.font.Font(None, 36)
-
-        # Carrega a imagem do coração (vida)
-        try:
-            self.heart_image = pygame.image.load(PATH_ICON_HEART).convert_alpha()
-            self.heart_image = pygame.transform.scale(self.heart_image, (32, 32))  # Redimensiona para 32x32 pixels
-        except FileNotFoundError:
-            print("Erro: Arquivo 'heart.png' não encontrado. Usando fallback.")
-            self.heart_image = pygame.Surface((32, 32))  # Fallback: superfície vazia
-            self.heart_image.fill((255, 0, 0))  # Preenche com vermelho
 
     def draw(self, time_left):
         """
@@ -56,7 +46,7 @@ class GameUI:
         time_text = self.font.render(f"Tempo: {time_left}", True, WHITE)
         self.screen.blit(time_text, (self.map_width + 10, 10))  # Posiciona o tempo no topo da área da interface
 
-        # Desenhar as fotos, vidas e troféus dos personagens
+        # Desenhar as fotos, nomes e troféus dos personagens
         for i, player in enumerate(self.players):
             # Posição base para cada jogador
             base_x = self.map_width + 10  # Margem à esquerda da interface
@@ -65,16 +55,16 @@ class GameUI:
             # Obtém o sprite virado para frente do jogador
             if hasattr(player, 'animations') and "down" in player.animations:
                 player_sprite = player.animations["down"][0]  # Primeiro frame da animação "frente"
-                self.screen.blit(player_sprite, (base_x, base_y))
+                self.screen.blit(player_sprite, (base_x, base_y + 30))  # Ajuste para deixar espaço para o nome
             else:
                 print(f"Erro: Jogador {i} não possui animações ou direção 'down'.")
 
-            # Desenhar a vida do personagem (corações)
-            if hasattr(player, 'health'):
-                for h in range(player.health):
-                    self.screen.blit(self.heart_image, (base_x + 70 + h * 35, base_y + 20))  # Posiciona os corações ao lado da foto
+            # Desenhar o nome do personagem
+            if hasattr(player, 'name'):
+                name_text = self.font.render(player.name, True, WHITE)
+                self.screen.blit(name_text, (base_x, base_y))  # Nome acima da figura
 
             # Desenhar os troféus do personagem
             if hasattr(player, 'round_wins'):
                 for t in range(player.round_wins):
-                    self.screen.blit(self.trophy_image, (base_x + 70 + t * 35, base_y + 60))  # Posiciona os troféus abaixo dos corações
+                    self.screen.blit(self.trophy_image, (base_x + 70 + t * 35, base_y + 30))  # Posiciona os troféus ao lado da foto

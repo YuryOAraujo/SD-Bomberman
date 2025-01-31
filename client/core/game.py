@@ -5,6 +5,7 @@ from player.player import Player
 from utils.map import Map
 from threading import Thread
 from bomb.bomb import Bomb
+import sys
 
 from core.network_client import NetworkClient
 from player.player_manager import PlayerManager
@@ -61,6 +62,8 @@ class Game:
         self.max_wins = MAX_WINS
         self.winner = ''
         self.game_over = False
+
+        self.font = pygame.font.Font(None, 36)  # Adiciona a fonte
 
         self.last_position = (0, 0)
         self.time_left = 180 
@@ -141,6 +144,39 @@ class Game:
         self.bomb_manager.reset_bombs()
         self.player_manager.reset_players()
 
+    def show_winner_screen(self, winner):
+        """Exibe a tela de vitória com o nome, a figura e uma mensagem de parabéns."""
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # Voltar ao menu ao pressionar Enter
+                        return
+
+            # Desenhar a tela de vitória
+            self.screen.fill((0, 0, 0))  # Fundo preto
+
+            # Mensagem de parabéns
+            congrats_text = self.font.render("Parabéns!", True, (255, 255, 255))
+            self.screen.blit(congrats_text, (self.screen.get_width() // 2 - 100, 100))
+
+            # Nome do vencedor
+            name_text = self.font.render(winner.name, True, (255, 255, 255))
+            self.screen.blit(name_text, (self.screen.get_width() // 2 - 50, 200))
+
+            # Figura do vencedor
+            if hasattr(winner, 'animations') and "down" in winner.animations:
+                winner_sprite = winner.animations["down"][0]
+                self.screen.blit(winner_sprite, (self.screen.get_width() // 2 - 32, 250))
+
+            # Instrução para voltar ao menu
+            back_text = self.font.render("Pressione ENTER para voltar ao menu", True, (255, 255, 255))
+            self.screen.blit(back_text, (self.screen.get_width() // 2 - 200, 400))
+
+            pygame.display.flip()
+
     def run(self):
         """
         Loop principal do jogo, que gerencia o estado do jogo, desenha na tela,
@@ -216,6 +252,9 @@ class Game:
                         if winner:
                             winner.round_wins += 1
                             print(f"Player {winner.player_id} wins the round!")
+                            if winner.round_wins == self.max_wins:
+                                self.show_winner_screen(winner)  # Exibe a tela de vitória
+                                return  # Volta ao menu
                         self.elapsed_rounds += 1
                         break
 
