@@ -329,39 +329,77 @@ class Menu:
 
     def credits_screen(self):
         """Tela para exibir os créditos do jogo."""
+        # Criar um fundo escuro semitransparente
+        dark_overlay = pygame.Surface((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        dark_overlay.fill((20, 20, 30))  
+        dark_overlay.set_alpha(230)  
+
+        credits = [
+            "Criadores:",
+            "Gabriel Afonso Barbosa",
+            "Yury Araujo",
+            "Igor Augusto",
+            "Michele",
+            "Miller",
+            "Pedro",
+            "",  
+            "Obs: \"é só uma matriz\" - Igor Augusto" 
+        ]
+
+        scroll_y = self.SCREEN_HEIGHT 
+        scroll_speed = 2  
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Clique esquerdo
-                        return  # Voltar ao menu principal
+                elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    return  
 
-            # Desenhar tela de créditos
-            self.screen.fill(self.GRAY)
+            # Desenhar fundo
+            self.screen.blit(self.background_image, (0, 0))
+            self.screen.blit(dark_overlay, (0, 0))
+
+            # Container central
+            container_rect = pygame.Rect(self.SCREEN_WIDTH // 2 - 300, 50, 600, self.SCREEN_HEIGHT - 100)
+            pygame.draw.rect(self.screen, (30, 30, 40), container_rect, border_radius=15)
+            pygame.draw.rect(self.screen, self.HIGHLIGHT, container_rect, 2, border_radius=15)
 
             # Título
-            self.draw_text("Credits", self.font, self.WHITE, (self.SCREEN_WIDTH // 2, 100))
+            title_text = "Créditos"
+            title_shadow = self.font.render(title_text, True, (0, 0, 0))
+            title = self.font.render(title_text, True, self.HIGHLIGHT)
+            title_pos = (self.SCREEN_WIDTH // 2, 80)
+            self.screen.blit(title_shadow, (title_pos[0] - title.get_width()//2 + 2, title_pos[1] + 2))
+            self.screen.blit(title, (title_pos[0] - title.get_width()//2, title_pos[1]))
 
-            # Lista de créditos
-            credits = [
-                "Criadores:",
-                "Gabriel Afonso Barbosa",
-                "Yury Araujo",
-                "Igor Augusto",
-                "Michele",
-                "Miller",
-                "Pedro"
-            ]
-
+            # Desenhar créditos com efeito de rolagem
             for i, credit in enumerate(credits):
-                self.draw_text(credit, self.small_font, self.WHITE, (self.SCREEN_WIDTH // 2, 200 + i * 50))
+                y_pos = scroll_y + i * 50
+                if 120 < y_pos < self.SCREEN_HEIGHT - 60:
+                    if i == 0:  
+                        text_surf = self.font.render(credit, True, self.HIGHLIGHT)
+                    elif i == len(credits) - 1:  
+                        text_surf = self.small_font.render(credit, True, self.HIGHLIGHT)
+                    else:
+                        text_surf = self.small_font.render(credit, True, self.WHITE)
+                    text_rect = text_surf.get_rect(center=(self.SCREEN_WIDTH // 2, y_pos))
+                    self.screen.blit(text_surf, text_rect)
+
+            # Atualizar posição de rolagem
+            scroll_y -= scroll_speed
+            if scroll_y < -len(credits) * 50:
+                scroll_y = self.SCREEN_HEIGHT
 
             # Instrução para voltar
-            self.draw_text("Click anywhere to return", self.small_font, self.WHITE, (self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT - 50))
+            back_text = "Pressione qualquer tecla para voltar"
+            back_surf = self.small_font.render(back_text, True, self.WHITE)
+            back_rect = back_surf.get_rect(center=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT - 30))
+            self.screen.blit(back_surf, back_rect)
 
             pygame.display.flip()
+            pygame.time.wait(20)  # Pequena pausa para controlar a velocidade de rolagem
 
 # Iniciar menu principal
 menu = Menu()
