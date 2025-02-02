@@ -111,15 +111,15 @@ class Server:
                 elif data.get("type") == DATA_TYPE_PLAYER_UPDATE:
                     self.player_data[player_id] = {
                         "position": data["position"],
-                        "direction": data["direction"]
+                        "direction": data["direction"],
+                        "name": data.get("name", f"P{player_id + 1}")  # Incluir nome
                     }
-                    data = {
+                    broadcast_data = {
                         "type": DATA_TYPE_PLAYER_DATA,
                         "players": self.player_data,
                         "grid": self.map_manager.get_grid()
-                    }    
-        
-                    self.network_manager.broadcast(data)
+                    }
+                    self.network_manager.broadcast(broadcast_data)
 
                 elif data.get("type") == "win":
                     self.map_manager.reset_grid()

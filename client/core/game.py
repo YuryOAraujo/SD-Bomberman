@@ -100,6 +100,11 @@ class Game:
                 if isinstance(data, dict) and "type" in data:
                     if data["type"] == DATA_TYPE_PLAYER_DATA:
                         self.player_manager.player_data = data["players"]
+                        for i, player_data in enumerate(data["players"]):
+                            if i < len(self.player_manager.players):
+                                player = list(self.player_manager.players)[i]
+                                if "name" in player_data:
+                                    player.name = player_data["name"]
                     elif data["type"] == DATA_TYPE_BOMB:
                         self.bomb_manager.add_bomb(data)
                     elif data["type"] == DATA_TYPE_GRID_UPDATE:
@@ -122,6 +127,8 @@ class Game:
                 "type": DATA_TYPE_PLAYER_UPDATE,
                 "position": local_player.rect.topleft,
                 "direction": local_player.direction,
+                "name": local_player.name,  # Adicionar nome do jogador
+                "player_id": local_player.player_id
             }
             self.network_client.send_data(data)
             self.last_position = local_player.rect.topleft
