@@ -197,7 +197,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = max(0, min(self.rect.y, HEIGHT - SPRITE_HEIGHT))
 
         # Coloca uma bomba se a tecla de espaço for pressionada
-        if keys[pygame.K_g]:
+        if keys[pygame.K_SPACE]:
             bomb = self.place_bomb()
             if bomb:
                 return bomb

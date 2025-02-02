@@ -125,7 +125,6 @@ class Server:
                         "type": "win",
                         "grid": self.map_manager.get_grid()
                     }
-                    print("Aqui")
                     self.network_manager.broadcast(data)
             else:
                 print(f"Unexpected data format received: {data}")

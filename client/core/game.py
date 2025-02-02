@@ -104,7 +104,6 @@ class Game:
                         self.map.grid = data["grid"]
                         self.map.draw_static_map()
                     elif data["type"] == "win":
-                        print(f'Receive: {data}\n')
                         self.map.grid = data["grid"]
                         self.map.draw_static_map() 
 
@@ -323,7 +322,6 @@ class Game:
                                 self.show_winner_screen(winner)  # Exibe a tela de vitória
                                 return  # Volta ao menu
                             self.send_winner(winner.player_id)
-                            print("Aqui")
                         self.elapsed_rounds += 1
                         break
 
