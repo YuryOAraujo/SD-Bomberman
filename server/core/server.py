@@ -34,6 +34,8 @@ class Server:
         self.player_data = [{"position": (48, 48), "direction": "down"} for _ in range(MAX_PLAYERS)]
         self.bombs = []  
         self.bomb_lock = threading.Lock()
+        self.elapsed_rounds = INITIAL_ROUND
+        self.wins = [0] * MAX_PLAYERS
 
     def handle_bomb_explosion(self, bomb_data):
 
@@ -121,6 +123,8 @@ class Server:
 
                 elif data.get("type") == "win":
                     self.map_manager.reset_grid()
+                    self.wins[data["player"] - 1] += 1
+                    self.elapsed_rounds += 1
                     data = {
                         "type": "win",
                         "grid": self.map_manager.get_grid()
@@ -139,9 +143,15 @@ class Server:
             client (socket.socket): O socket do cliente que se conectou.
             player_id (int): O ID do jogador que está se conectando.
         """
+        
+        data = {
+            "map": (self.map_manager.get_grid(), self.map_manager.get_stage()), 
+            "round": self.elapsed_rounds,
+            "wins": self.wins
+        }
 
         self.network_manager.send_data(client, player_id)
-        self.network_manager.send_data(client, (self.map_manager.get_grid(), self.map_manager.get_stage()))
+        self.network_manager.send_data(client, data)
         threading.Thread(target=self.handle_client, args=(client, player_id)).start()
 
     def run(self):

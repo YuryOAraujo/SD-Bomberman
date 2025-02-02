@@ -60,7 +60,7 @@ class Game:
         self.map = None
 
         self.round_active = BOMB_DEFAULT_PLANTED
-        self.elapsed_rounds = INITIAL_ROUND
+        self.elapsed_rounds = None
         self.max_wins = MAX_WINS
         self.winner = ''
         self.game_over = False
@@ -79,8 +79,10 @@ class Game:
         """
                 
         if self.network_client.connect():
-            self.map = Map(*pickle.loads(self.network_client.client.recv(4096)))
-            self.player_manager.initialize_players()
+            data = pickle.loads(self.network_client.client.recv(4096))
+            self.map = Map(*data['map'])
+            self.elapsed_rounds = data['round']
+            self.player_manager.initialize_players(data['wins'])
             Thread(target=self.listen_for_updates, daemon=True).start()
         else:
             exit()

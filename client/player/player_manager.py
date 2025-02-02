@@ -32,7 +32,7 @@ class PlayerManager:
         self.network_client = network_client
         self.player_data = []
 
-    def initialize_players(self):
+    def initialize_players(self, wins):
 
         """
         Inicializa os jogadores e define o jogador local com base no ID fornecido pelo servidor.
@@ -41,9 +41,9 @@ class PlayerManager:
         na posição inicial correspondente. Define o jogador local com base no `player_id`
         do cliente de rede.
         """
-
         for i in range(4):
             player = Player(i + 1, initial_position=player_positions[i])
+            player.round_wins = wins[player.player_id - 1]
             self.players.add(player)
         self.local_player = list(self.players)[self.network_client.player_id]
 

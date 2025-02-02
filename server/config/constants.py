@@ -36,3 +36,6 @@ DATA_TYPE_PLAYER_DATA = "player_data"
 
 # Constante para definir os tipos de terreno no mapa
 STAGES = ("Stage 1", "Stage 2")
+
+ # Número da rodada inicial quando o jogo começa
+INITIAL_ROUND = 1
