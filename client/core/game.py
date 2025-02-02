@@ -102,6 +102,10 @@ class Game:
                         self.bomb_manager.add_bomb(data)
                     elif data["type"] == DATA_TYPE_GRID_UPDATE:
                         self.map.grid = data["grid"]
+                        self.map.draw_static_map()
+                    elif data["type"] == "win":
+                        print(f'Receive: {data}\n')
+                        self.map.grid = data["grid"]
                         self.map.draw_static_map() 
 
     def send_position_and_direction(self):
@@ -132,6 +136,13 @@ class Game:
             "position": bomb.rect.topleft,
             "player_id": bomb.player_id,
             "planted": bomb.planted,
+        }
+        self.network_client.send_data(data)
+
+    def send_winner(self, player_id):
+        data = {
+            "type": "win",
+            "player": player_id
         }
         self.network_client.send_data(data)
 
@@ -311,6 +322,8 @@ class Game:
                             if winner.round_wins == self.max_wins:
                                 self.show_winner_screen(winner)  # Exibe a tela de vitória
                                 return  # Volta ao menu
+                            self.send_winner(winner.player_id)
+                            print("Aqui")
                         self.elapsed_rounds += 1
                         break
 

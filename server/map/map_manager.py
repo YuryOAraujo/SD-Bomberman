@@ -1,5 +1,6 @@
 from random import randint
 from .grid_base import *
+import copy
 
 from config.constants import *
 
@@ -8,6 +9,7 @@ class MapManager:
     def __init__(self, stage_name):
         self.stage_name = stage_name
         self.grid = GRID_BASE[stage_name]
+        self.initial_grid = None
         self.generate_boxes()
 
     def generate_boxes(self):
@@ -21,6 +23,8 @@ class MapManager:
                     continue
                 if randint(0, 9) < 7:
                     self.grid[row][col] = 2
+        
+        self.initial_grid = copy.deepcopy(self.grid)
 
     def destroy_boxes_around(self, position, radius=1):
 
@@ -48,3 +52,7 @@ class MapManager:
     def get_stage(self):
         """Retorna o nome do estágio atual."""
         return self.stage_name
+    
+    def reset_grid(self):
+        self.grid = copy.deepcopy(self.initial_grid)
+        

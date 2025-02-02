@@ -90,7 +90,7 @@ class Server:
             data = self.network_manager.receive_data(client)
             if data is None:
                 break
-
+            
             if isinstance(data, dict):
                 if data.get("type") == DATA_TYPE_BOMB:
                     bomb_data = {
@@ -115,8 +115,17 @@ class Server:
                         "type": DATA_TYPE_PLAYER_DATA,
                         "players": self.player_data,
                         "grid": self.map_manager.get_grid()
+                    }    
+        
+                    self.network_manager.broadcast(data)
+
+                elif data.get("type") == "win":
+                    self.map_manager.reset_grid()
+                    data = {
+                        "type": "win",
+                        "grid": self.map_manager.get_grid()
                     }
-                    
+                    print("Aqui")
                     self.network_manager.broadcast(data)
             else:
                 print(f"Unexpected data format received: {data}")
