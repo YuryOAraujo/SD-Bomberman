@@ -151,18 +151,26 @@ class Menu:
             self.menu_positions.append(text_rect)
 
     def menu_loop(self):
+
         """Loop do menu principal."""
+
         while True:
+
             current_time = pygame.time.get_ticks()
+
             for event in pygame.event.get():
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         self.selected_item = (self.selected_item - 1) % len(self.menu_items)  # Navegar para cima
+
                     elif event.key == pygame.K_DOWN:
                         self.selected_item = (self.selected_item + 1) % len(self.menu_items)  # Navegar para baixo
+
                     elif event.key == pygame.K_RETURN:
                         if self.selected_item == 0:
                             ip, port, name = self.connection_screen()
@@ -339,7 +347,7 @@ class Menu:
             "Gabriel Afonso Barbosa",
             "Yury Araujo",
             "Igor Augusto",
-            "Michele",
+            "Michelle",
             "Miller",
             "Pedro",
             "",  

@@ -6,21 +6,14 @@ from utils.map import Map
 from threading import Thread
 from bomb.bomb import Bomb
 import sys
-import random
-import math
 import time
 
 from core.network_client import NetworkClient
 from player.player_manager import PlayerManager
 from bomb.bomb_manager import BombManager
 from ui.game_ui import GameUI
-
-player_positions = [
-    (48, 48),
-    (624, 48),
-    (48, 624),
-    (624, 624)
-]
+from ui.winner_screen import WinnerScreen
+from ui.wainting_screen import WaitingScreen
 
 # Configurações de rede
 SERVER_IP = '127.0.0.1'  # IP do servidor
@@ -48,37 +41,30 @@ class Game:
 
     def __init__(self, ip=SERVER_IP, port=SERVER_PORT):
 
+        self.game_active = False
+        self.init_interface()
+        self.initialize_managers(ip, port)
+        self.connect_to_server()
+
+    def init_interface(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((TOTAL_WIDTH, TOTAL_HEIGHT))  # Usa WIDTH e HEIGHT atualizados
+        self.screen = pygame.display.set_mode((TOTAL_WIDTH, TOTAL_HEIGHT))  
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
-        self.game_active = True
+        self.font = pygame.font.Font(None, 36) 
 
-        # Inicializa o cliente de rede e gerenciadores
+    def initialize_managers(self, ip, port):
+
         self.network_client = NetworkClient(ip, port)
         self.player_manager = PlayerManager(self.network_client)
         self.bomb_manager = BombManager(self.player_manager.players)
-        self.map = None
-
-        self.round_active = BOMB_DEFAULT_PLANTED
-        self.elapsed_rounds = None
-        self.max_wins = MAX_WINS
-        self.winner = ''
-        self.game_over = False
-
-        self.font = pygame.font.Font(None, 36)  # Adiciona a fonte
-
-        self.last_position = (0, 0)
-
-        self.connect_to_server()
 
     def connect_to_server(self):
 
         """
         Conecta ao servidor de jogos. Se a conexão for bem-sucedida, inicializa o mapa e
         os jogadores, e inicia uma thread para ouvir atualizações do servidor.
-        """
-                
+        """     
         if self.network_client.connect():
             data = pickle.loads(self.network_client.client.recv(4096))
             self.map = Map(*data['map'])
@@ -88,6 +74,16 @@ class Game:
         else:
             exit()
 
+    def init_game(self):
+
+        self.game_active = True
+        self.round_active = BOMB_DEFAULT_PLANTED
+        self.max_wins = MAX_WINS
+        self.winner = ''
+        self.game_over = False
+
+        self.last_position = (0, 0)
+
     def listen_for_updates(self):
 
         """
@@ -96,9 +92,14 @@ class Game:
         """
 
         while True:
+
             data = self.network_client.receive_data()
+
             if data:
                 if isinstance(data, dict) and "type" in data:
+                    if data["type"] == "start":
+                        self.init_game()
+                    
                     if data["type"] == DATA_TYPE_PLAYER_DATA:
                         self.player_manager.player_data = data["players"]
                         for i, player_data in enumerate(data["players"]):
@@ -147,139 +148,56 @@ class Game:
             "player_id": bomb.player_id,
             "planted": bomb.planted,
         }
+
         self.network_client.send_data(data)
 
     def send_winner(self, player_id):
+
         data = {
             "type": "win",
             "player": player_id
         }
+
         self.network_client.send_data(data)
 
     def send_eliminated_player(self, player_id):
+
         data = {
             "type": "eliminated",
             "player": player_id
         }
+
         self.network_client.send_data(data)
 
     def reset_round(self):
-
+        
         """
         Reinicia o estado do jogo para uma nova rodada, incluindo
         a posição dos jogadores e bombas.
         """
-
         self.bomb_manager.reset_bombs()
         self.player_manager.reset_players()
 
-    def show_winner_screen(self, winner):
-        def create_gradient_background(width, height, start_color, end_color):
-            background = pygame.Surface((width, height))
-            for y in range(height):
-                r = start_color[0] + (end_color[0] - start_color[0]) * y / height
-                g = start_color[1] + (end_color[1] - start_color[1]) * y / height
-                b = start_color[2] + (end_color[2] - start_color[2]) * y / height
-                pygame.draw.line(background, (r, g, b), (0, y), (width, y))
-            return background
-
-        class Explosion:
-            def __init__(self, x, y):
-                self.x = x
-                self.y = y
-                self.radius = 1
-                self.max_radius = random.randint(10, 20)
-                self.growth_rate = random.uniform(0.5, 1.5)
-                self.alpha = 255
-                self.fade_rate = random.uniform(3, 7)
-                self.color = (255, random.randint(100, 200), 0)  # Tons de laranja/amarelo
-                self.active = True
-
-            def update(self):
-                self.radius += self.growth_rate
-                self.alpha -= self.fade_rate
-                if self.alpha <= 0 or self.radius >= self.max_radius:
-                    self.active = False
-
-            def draw(self, surface):
-                if self.active:
-                    surf = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
-                    pygame.draw.circle(surf, (*self.color, int(self.alpha)), 
-                                    (self.radius, self.radius), self.radius)
-                    surface.blit(surf, (self.x - self.radius, self.y - self.radius))
-
-        background = create_gradient_background(self.screen.get_width(), self.screen.get_height(), 
-                                            (0, 0, 100), (0, 0, 50))
-        
-        title_font = pygame.font.Font(None, 72)
-        text_font = pygame.font.Font(None, 48)
-        
-        explosions = []
-        clock = pygame.time.Clock()
-        start_time = pygame.time.get_ticks()
-        
-        while True:
-            current_time = pygame.time.get_ticks()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        return
-
-            # Criar novas explosões aleatoriamente
-            if random.random() < 0.1:  # Ajuste este valor para controlar a frequência das explosões
-                x = random.randint(0, self.screen.get_width())
-                y = random.randint(0, self.screen.get_height())
-                explosions.append(Explosion(x, y))
-
-            self.screen.blit(background, (0, 0))
-
-            # Atualizar e desenhar explosões
-            explosions = [exp for exp in explosions if exp.active]
-            for explosion in explosions:
-                explosion.update()
-                explosion.draw(self.screen)
-
-            # Mensagem de parabéns com animação
-            scale = 1 + 0.1 * math.sin(current_time * 0.005)
-            congrats_text = title_font.render("Parabéns!", True, (255, 255, 0))
-            congrats_rect = congrats_text.get_rect(center=(self.screen.get_width() // 2, 100))
-            scaled_congrats = pygame.transform.scale(congrats_text, 
-                                                (int(congrats_rect.width * scale), 
-                                                int(congrats_rect.height * scale)))
-            scaled_rect = scaled_congrats.get_rect(center=congrats_rect.center)
-            self.screen.blit(scaled_congrats, scaled_rect)
-
-            # Nome do vencedor
-            name_text = text_font.render(winner.name, True, (255, 255, 255))
-            self.screen.blit(name_text, (self.screen.get_width() // 2 - name_text.get_width() // 2, 200))
-
-            # Figura do vencedor ampliada
-            if hasattr(winner, 'animations') and "down" in winner.animations:
-                winner_sprite = winner.animations["down"][0]
-                scaled_sprite = pygame.transform.scale(winner_sprite, (128, 128)).convert_alpha()
-                self.screen.blit(scaled_sprite, (self.screen.get_width() // 2 - 64, 250))
-
-            # Instrução para voltar ao menu
-            back_text = text_font.render("Pressione ENTER para voltar ao menu", True, (200, 200, 200))
-            self.screen.blit(back_text, (self.screen.get_width() // 2 - back_text.get_width() // 2, 450))
-
-            pygame.display.flip()
-            clock.tick(60)
+    def wait_for_game_start(self):
+        """Exibe a tela de espera dos jogadores."""
+        waiting_screen = WaitingScreen(self.screen, self.player_manager)
+        waiting_screen.wait_for_game_start()
 
     def run(self):
+
         """
         Loop principal do jogo, que gerencia o estado do jogo, desenha na tela,
         processa eventos e controla o fluxo de rodadas e vitórias.
         """
+        self.wait_for_game_start()
 
         # Inicializa a GameUI
         game_ui = GameUI(self.screen, self.player_manager.players, UI_WIDTH, WIDTH, "assets/icons/trophy.png")
 
         while self.game_active:
+
             if not self.game_over:
+
                 # Configura o início de uma nova rodada
                 print(f'Current round: {self.elapsed_rounds}')
                 self.round_active = True
@@ -329,7 +247,7 @@ class Game:
 
                     # Desenha as bombas e os jogadores
                     self.bomb_manager.bombs.draw(self.screen)
-                    self.player_manager.players.draw(self.screen)
+                    self.player_manager.draw_players(self.screen)
 
                     # Verifica se há apenas um jogador vivo
                     alive_players = [player for player in self.player_manager.players if not player.eliminated]
@@ -340,8 +258,8 @@ class Game:
                             winner.round_wins += 1
                             print(f"Player {winner.player_id} wins the round!")
                             if winner.round_wins == self.max_wins:
-                                self.show_winner_screen(winner)  # Exibe a tela de vitória
-                                return  # Volta ao menu
+                                WinnerScreen.show(self.screen, winner) 
+                                return 
                             self.send_winner(winner.player_id)
                         time.sleep(0.2)
                         break

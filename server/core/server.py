@@ -33,7 +33,7 @@ class Server:
 
         self.network_manager = NetworkServer(HOST, PORT, MAX_PLAYERS)
         self.map_manager = MapManager(random.choice(STAGES))
-        self.player_data = [{"position": (48, 48), "direction": "down"} for _ in range(MAX_PLAYERS)]
+        self.player_data = [{"position": (-2, -2), "direction": "down"} for _ in range(MAX_PLAYERS)]
         self.bombs = []  
         self.bomb_lock = threading.Lock()
         self.elapsed_rounds = INITIAL_ROUND
@@ -155,7 +155,7 @@ class Server:
 
             else:
                 print(f"Unexpected data format received: {data}")
-
+                
     def on_client_connect(self, client, player_id):
 
         """
@@ -179,6 +179,15 @@ class Server:
         self.network_manager.send_data(client, player_id)
         self.network_manager.send_data(client, data)
         threading.Thread(target=self.handle_client, args=(client, player_id)).start()
+
+        # Verifica se o número de jogadores atingiu o máximo
+        if len(self.players) == MAX_PLAYERS:
+
+            print("Todos os jogadores conectados! Iniciando o jogo...")
+            
+            # Enviar mensagem de início para todos os clientes
+            start_data = {"type": "start"}
+            self.network_manager.broadcast(start_data)
 
     def run(self):
 
