@@ -45,7 +45,6 @@ class PlayerManager:
             player = Player(i + 1, initial_position=player_positions[i])
             player.round_wins = wins[player.player_id - 1]
             self.players.add(player)
-            
         self.local_player = list(self.players)[self.network_client.player_id]
 
     def update_players(self):
@@ -77,14 +76,6 @@ class PlayerManager:
             player.eliminated = False
             player.reset_bombs()
     
-    def draw_players(self, screen):
-
-        """
-        Desenha todos os jogadores na tela.
-
-        Args:
-            screen (pygame.Surface): A superfície onde os jogadores serão desenhados.
-        """
-
+    def update_players_wins(self, wins):
         for player in self.players:
-            screen.blit(player.image, player.rect.topleft)
+            player.round_wins = wins[player.player_id - 1]

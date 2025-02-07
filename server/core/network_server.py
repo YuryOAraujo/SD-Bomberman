@@ -82,28 +82,34 @@ class NetworkServer:
             self.send_data(client, data)
 
     def receive_data(self, client):
-        
+
         """
-        Recebe dados de um cliente, tentando deserializar os dados recebidos.
+        Recebe dados de um cliente, tratando possíveis erros de desconexão.
 
         Args:
             client (socket.socket): O socket do cliente de onde os dados serão recebidos.
 
         Retorna:
             any: Os dados recebidos e desserializados do cliente, ou None em caso de erro.
-        
-        Exceções:
-            EOFError, ConnectionResetError: Ocorrem quando a conexão do cliente é fechada ou reiniciada.
-            pickle.UnpicklingError: Ocorre se os dados recebidos não puderem ser deserializados corretamente.
         """
 
         try:
-            data = pickle.loads(client.recv(4096))
-            return data
+            raw_data = client.recv(4096)
+
+            if not raw_data:  # Cliente fechou a conexão
+                print("Client disconnected.")
+                self.clients.remove(client)
+                client.close()
+                return None
+
+            return pickle.loads(raw_data)
+
         except (EOFError, ConnectionResetError) as e:
             print(f"Client disconnected: {e}")
             self.clients.remove(client)
+            client.close()
             return None
+
         except pickle.UnpicklingError as e:
             print(f"Failed to decode data from client: {e}")
             return None

@@ -33,7 +33,7 @@ class Server:
 
         self.network_manager = NetworkServer(HOST, PORT, MAX_PLAYERS)
         self.map_manager = MapManager(random.choice(STAGES))
-        self.player_data = [{"position": (-2, -2), "direction": "down"} for _ in range(MAX_PLAYERS)]
+        self.player_data = [{"position": (48, 48), "direction": "down"} for _ in range(MAX_PLAYERS)]
         self.bombs = []  
         self.bomb_lock = threading.Lock()
         self.elapsed_rounds = INITIAL_ROUND
@@ -91,6 +91,35 @@ class Server:
         
         return 0
 
+    def reset_game(self):
+
+        """Reinicia completamente o jogo sem parar o servidor."""
+
+        print("Resetting game...")
+
+        # Escolher um novo mapa
+        self.map_manager = MapManager(random.choice(STAGES))  
+        self.player_data = [{"position": (48, 48), "direction": "down"} for _ in range(MAX_PLAYERS)]
+        self.bombs = []
+        self.wins = [0] * MAX_PLAYERS
+        self.elapsed_rounds = INITIAL_ROUND
+
+        # Resetar os jogadores
+        for player in self.players:
+            player.reset_player()
+
+        # Enviar atualização normal para os clientes
+        update_data = {
+            "type": DATA_TYPE_PLAYER_DATA,
+            "players": self.player_data,
+            "grid": self.map_manager.get_grid(),
+            "round": self.elapsed_rounds,
+            "wins": self.wins
+        }
+        self.network_manager.broadcast(update_data)
+
+        print("Game reset complete. Waiting for players...")
+
     def handle_client(self, client, player_id):
 
         """
@@ -115,6 +144,7 @@ class Server:
                         "player_id": data["player_id"],
                         "planted": data["planted"],
                     }
+
                     self.network_manager.broadcast(bomb_data)
 
                     # Adicionar a bomba com Lock
@@ -145,17 +175,21 @@ class Server:
                     data = {
                         "type": "win",
                         "grid": self.map_manager.get_grid(),
-                        "round": self.elapsed_rounds
+                        "round": self.elapsed_rounds,
+                        "wins": self.wins # Lista de vitórias de todos os jogadores
                     }
                     self.network_manager.broadcast(data)
 
                 elif data.get("type") == "eliminated":
                     index = self.get_player(data['player'])
                     self.players[index].eliminate_player()
+                
+                elif data.get("type") == "game_over":
+                    self.reset_game()
 
             else:
                 print(f"Unexpected data format received: {data}")
-                
+
     def on_client_connect(self, client, player_id):
 
         """
@@ -179,15 +213,6 @@ class Server:
         self.network_manager.send_data(client, player_id)
         self.network_manager.send_data(client, data)
         threading.Thread(target=self.handle_client, args=(client, player_id)).start()
-
-        # Verifica se o número de jogadores atingiu o máximo
-        if len(self.players) == MAX_PLAYERS:
-
-            print("Todos os jogadores conectados! Iniciando o jogo...")
-            
-            # Enviar mensagem de início para todos os clientes
-            start_data = {"type": "start"}
-            self.network_manager.broadcast(start_data)
 
     def run(self):
 

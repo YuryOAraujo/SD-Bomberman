@@ -22,6 +22,8 @@ class NetworkClient:
         """
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client.settimeout(5) 
+
         self.server_host = server_host
         self.server_port = server_port
         self.player_id = None
@@ -55,8 +57,12 @@ class NetworkClient:
         """
 
         try:
-            data = pickle.loads(self.client.recv(4096))
-            return data
+            raw_data = self.client.recv(4096)
+            if not raw_data:
+                print("Connection lost.")
+                self.close()
+                return None
+            return pickle.loads(raw_data)
         except Exception as e:
             print(f"Failed to receive data: {e}")
             return None
