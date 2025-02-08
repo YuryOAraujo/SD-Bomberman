@@ -6,9 +6,8 @@ Original Bomb Party sprite sheet by Matt Hackett of Lost Decade Games, expanded 
 <a>https://opengameart.org/content/bomb-party-the-complete-set</a>
 
 ## 🚀 Features
-- 🎩 **Local Multiplayer**: Play with up to 4 players on the same screen.
 - 🔥 **Classic Gameplay**: Mechanics faithful to the original Bomberman.
-- 🌍 **Online Mode**: Connect up to four players.
+- 🌍 **Multiplayer**: Connect up to four players.
 - 💻 **Open Source**: Developed in **Python with Pygame**.
 
 ## 📸 Screenshots
@@ -17,16 +16,6 @@ Original Bomb Party sprite sheet by Matt Hackett of Lost Decade Games, expanded 
 ## 🛠️ Technologies Used
 - **Python with Pygame** (Game)
 - **UDP Sockets** (Multiplayer Features)
-
-## 💂‍♂️ Project Structure
-```
-/bomberman
-│── index.html   # Main website structure
-│── styles.css   # Styling and design
-│── script.js    # Interactions and effects
-│── server/main.py   # Server-side script
-│── client/main.py   # Client-side script
-```
 
 ## 🔧 How to Run
 1. Clone this repository:
