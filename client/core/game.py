@@ -8,7 +8,6 @@ from bomb.bomb import Bomb
 import sys
 import random
 import math
-import time
 
 from core.network_client import NetworkClient
 from player.player_manager import PlayerManager
@@ -113,7 +112,6 @@ class Game:
                         self.map.draw_static_map()
                     elif data["type"] == "win":
                         self.map.grid = data["grid"]
-                        self.elapsed_rounds = data["round"]
                         self.map.draw_static_map() 
 
     def send_position_and_direction(self):
@@ -152,13 +150,6 @@ class Game:
     def send_winner(self, player_id):
         data = {
             "type": "win",
-            "player": player_id
-        }
-        self.network_client.send_data(data)
-
-    def send_eliminated_player(self, player_id):
-        data = {
-            "type": "eliminated",
             "player": player_id
         }
         self.network_client.send_data(data)
@@ -324,9 +315,6 @@ class Game:
                     # Atualiza as bombas e verifica se algum jogador foi eliminado
                     last_eliminated_player = self.bomb_manager.update_bombs(self.screen)
 
-                    if last_eliminated_player != None and last_eliminated_player == self.player_manager.local_player:
-                       self.send_eliminated_player(last_eliminated_player.player_id)
-
                     # Desenha as bombas e os jogadores
                     self.bomb_manager.bombs.draw(self.screen)
                     self.player_manager.players.draw(self.screen)
@@ -336,14 +324,14 @@ class Game:
 
                     if len(alive_players) <= 1:
                         winner = alive_players[0] if alive_players else last_eliminated_player
-                        if winner and winner == self.player_manager.local_player:
+                        if winner:
                             winner.round_wins += 1
                             print(f"Player {winner.player_id} wins the round!")
                             if winner.round_wins == self.max_wins:
                                 self.show_winner_screen(winner)  # Exibe a tela de vitória
                                 return  # Volta ao menu
                             self.send_winner(winner.player_id)
-                        time.sleep(0.2)
+                        self.elapsed_rounds += 1
                         break
 
                     pygame.display.update()

@@ -1,13 +1,11 @@
 import threading
 import time
 import random
-from player.player import Player
 from core.network_server import NetworkServer
 
 from map.map_manager import MapManager
 
 from config.constants import *
-import player.player
 
 class Server:
 
@@ -37,7 +35,6 @@ class Server:
         self.bombs = []  
         self.bomb_lock = threading.Lock()
         self.elapsed_rounds = INITIAL_ROUND
-        self.players = []
         self.wins = [0] * MAX_PLAYERS
 
     def handle_bomb_explosion(self, bomb_data):
@@ -79,17 +76,6 @@ class Server:
         }
 
         self.network_manager.broadcast(grid_data)
-
-    def reset_player(self):
-        for i in self.players:
-            i.reset_player()
-
-    def get_player(self, player_id):
-        for index, i in enumerate(self.players):
-            if i.player_id == player_id:
-                return index
-        
-        return 0
 
     def handle_client(self, client, player_id):
 
@@ -137,30 +123,20 @@ class Server:
 
                 elif data.get("type") == "win":
                     self.map_manager.reset_grid()
-                    self.reset_player()
-                    index = self.get_player(data['player'])
                     self.wins[data["player"] - 1] += 1
                     self.elapsed_rounds += 1
-
                     data = {
                         "type": "win",
-                        "grid": self.map_manager.get_grid(),
-                        "round": self.elapsed_rounds
+                        "grid": self.map_manager.get_grid()
                     }
                     self.network_manager.broadcast(data)
-
-                elif data.get("type") == "eliminated":
-                    index = self.get_player(data['player'])
-                    self.players[index].eliminate_player()
-
             else:
                 print(f"Unexpected data format received: {data}")
 
     def on_client_connect(self, client, player_id):
 
         """
-        Lida 
-        com a conexão de um novo cliente. Envia dados iniciais do jogo para o cliente e inicia
+        Lida com a conexão de um novo cliente. Envia dados iniciais do jogo para o cliente e inicia
         a thread que gerenciará a comunicação com esse cliente.
 
         Args:
@@ -173,8 +149,6 @@ class Server:
             "round": self.elapsed_rounds,
             "wins": self.wins
         }
-
-        self.players.append(Player(player_id + 1))
 
         self.network_manager.send_data(client, player_id)
         self.network_manager.send_data(client, data)
