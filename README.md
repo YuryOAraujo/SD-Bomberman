@@ -2,6 +2,9 @@
 
 Welcome to **Bomberman**, an explosive multiplayer game where strategy and timing are key! Challenge your friends in intense battles and be the last survivor.  
 
+Original Bomb Party sprite sheet by Matt Hackett of Lost Decade Games, expanded by Cem Kalyoncu and /usr/share.
+<a>https://opengameart.org/content/bomb-party-the-complete-set</a>
+
 ## 🚀 Features
 - 🎩 **Local Multiplayer**: Play with up to 4 players on the same screen.
 - 🔥 **Classic Gameplay**: Mechanics faithful to the original Bomberman.
