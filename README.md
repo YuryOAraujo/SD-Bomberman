@@ -42,8 +42,8 @@ Welcome to **Bomberman**, an explosive multiplayer game where strategy and timin
 ## 👥 Team
 - **Gabriel Afonso Barbosa** - UI/UX Designer ([GitHub](https://github.com/GabrielBarbosaAfo))
 - **Igor Augusto** - Game Logic Developer ([GitHub](https://github.com/IgorAuguusto))
-- **Michele** - Backend Developer ([GitHub](https://github.com/michelleGomes85))
-- **Miller** - Networking & Backend Integration ([GitHub](https://github.com/lmyller))
+- **Michele** - Backend Integration ([GitHub](https://github.com/michelleGomes85))
+- **Miller** - Backend Integration ([GitHub](https://github.com/lmyller))
 - **Pedro** - Audio Designer / Sound Engineer ([GitHub](https://github.com/pedrocota))
 - **Yury Araujo** - Game Logic Developer ([GitHub](https://github.com/YuryOAraujo))
 
