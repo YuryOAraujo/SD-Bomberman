@@ -6,7 +6,7 @@ class NetworkServer:
 
     """Gerencia a comunicação de rede UDP do servidor."""
     
-    def __init__(self, host='127.0.0.1', port=5555, max_clients=2):
+    def __init__(self, host='127.0.0.1', port=5555, max_clients=4):
 
         self.host = host
         self.port = port

@@ -52,6 +52,8 @@ PATH_ICON_HEART = "client/assets/icons/heart.png"
 
 PATH_BACKGROUND = "client/assets/background/Fundo.png"
 
+PATH_TROPHY = "client/assets/icons/trofeu.png"
+
 # Configurações de rede
 
  # Endereço IP do servidor

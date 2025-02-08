@@ -34,12 +34,16 @@ class PlayerManager:
         na posição inicial correspondente. Define o jogador local com base no `player_id`
         do cliente de rede.
         """
+
         for player_id, player_data in self.player_data.items():
             position = player_data['position']
             name = player_data['name']
             player = Player(player_id, initial_position=position)
             player.round_wins = 0
             player.name = name
+
+            player_data["sprints"] = player.animations
+            
             self.players.add(player)
 
         self.local_player = list(self.players)[self.network_client.player_id - 1]
@@ -77,11 +81,20 @@ class PlayerManager:
             direction = player_data['direction']
             round_wins = player_data['round_wins']
             
+            # Verifica se o nome está presente nos dados do jogador antes de atualizar
+            name = player_data.get('name', None)
+
             player = list(self.players)[player_id - 1]
             player.set_position(position)
             player.direction = direction
-            player.round_wins = round_wins                
+            player.round_wins = round_wins
+            
+            # Se o nome estiver presente, atualiza
+            if name is not None:
+                player.name = name
+            
             player.update()
+
         
     def reset_players(self):
 

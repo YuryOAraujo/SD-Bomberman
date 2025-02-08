@@ -35,12 +35,7 @@ class Game:
     def __init__(self, ip=SERVER_IP, port=SERVER_PORT, player_name=""):
 
         self.init_pygame()
-        self.game_active = True
-        self.round_active = True
-        self.max_wins = 3
-        self.game_over = False
-
-        self.message_queue = queue.Queue()  
+        self.init_game_information()
         self.start(ip, port, player_name)
 
     def init_pygame(self):
@@ -50,6 +45,14 @@ class Game:
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 36)
+
+    def init_game_information(self):
+        self.game_active = True
+        self.round_active = True
+        self.max_wins = 3
+        self.game_over = False
+
+        self.message_queue = queue.Queue()  
         
     def start(self, ip, port, player_name):
 
@@ -63,14 +66,17 @@ class Game:
         self.map = Map(*result["map"]) 
         self.player_data = result["players"] 
 
+        self.player_manager = PlayerManager(self.network, self.player_data)
+        self.player_manager.initialize_players()
+        self.last_position = (0, 0)
+
         waiting_screen = WaitingScreen(self.screen, self.network)
         self.player_data = waiting_screen.wait_for_game_start(self.player_data)
         if self.player_data == None:
             return  
         
-        self.player_manager = PlayerManager(self.network, self.player_data)
-        self.player_manager.initialize_players()
-        self.last_position = (0, 0)
+        self.player_manager.player_data = self.player_data
+        self.player_manager.update_player_all()
         
         self.bomb_manager = BombManager(self.player_manager.players)
 
@@ -111,7 +117,7 @@ class Game:
         
     def run(self):
 
-        self.game_ui = GameUI(self.screen, self.player_manager.players, UI_WIDTH, WIDTH, "assets/icons/trophy.png")
+        self.game_ui = GameUI(self.screen, self.player_manager.players, UI_WIDTH, WIDTH)
 
         while self.game_active:
 

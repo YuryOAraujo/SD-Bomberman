@@ -4,7 +4,7 @@ from config.constants import *
 
 class GameUI:
 
-    def __init__(self, screen, players, ui_width, map_width, trophy_image_path):
+    def __init__(self, screen, players, ui_width, map_width):
 
         self.screen = screen
         self.players = players
@@ -13,7 +13,7 @@ class GameUI:
 
         # Carrega a imagem do troféu
         try:
-            self.trophy_image = pygame.image.load("client/assets/icons/trofeu.png").convert_alpha()
+            self.trophy_image = pygame.image.load(PATH_TROPHY).convert_alpha()
             self.trophy_image = pygame.transform.scale(self.trophy_image, (24, 24))
         except FileNotFoundError:
             self.trophy_image = pygame.Surface((24, 24))
@@ -50,7 +50,8 @@ class GameUI:
         Args:
             new_player_data (dict): Um dicionário contendo os dados atualizados de todos os jogadores.
         """
-        self.players = new_player_data  # Atualiza a referência para os novos jogadores
+
+        self.players = new_player_data
 
     def draw(self):
         
@@ -63,6 +64,7 @@ class GameUI:
 
         # Desenhar informações dos jogadores
         for i, player in enumerate(self.players):
+            
             base_y = 70 + i * 120  # Aumentado o espaçamento vertical
             
             # Fundo do jogador
