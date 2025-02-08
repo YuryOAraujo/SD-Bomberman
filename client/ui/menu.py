@@ -34,8 +34,8 @@ class Menu:
         self.menu_positions = []
 
         # Valores padrão para IP e porta
-        self.default_ip = SERVER_IP  # IP padrão
-        self.default_port = SERVER_PORT   # Porta padrão
+        self.default_ip = SERVER_IP  
+        self.default_port = SERVER_PORT 
 
         self.background_image = pygame.image.load(PATH_BACKGROUND)
         self.background_image = pygame.transform.scale(self.background_image, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
@@ -49,8 +49,12 @@ class Menu:
         self.bomb_icon = pygame.transform.scale(self.bomb_icon, (32, 32))
         self.bomb_animation_frame = 0
         self.last_bomb_update = pygame.time.get_ticks()
-        self.bomb_update_delay = 200  # Tempo entre frames da animação em millisegundos
-        self.bomb_rotation = 0  # Para rotação da bomba
+
+        # Tempo entre frames da animação em millisegundos
+        self.bomb_update_delay = 200  
+
+        # Para rotação da bomba
+        self.bomb_rotation = 0  
 
     def create_particle(self):
         return {
@@ -58,22 +62,25 @@ class Menu:
             'y': random.randint(0, self.SCREEN_HEIGHT),
             'speed': random.uniform(1, 3),
             'size': random.randint(2, 5),
-            'color': random.choice([(255, 165, 0), (255, 69, 0), (255, 140, 0)])  # Tons de laranja
+            'color': random.choice([(255, 165, 0), (255, 69, 0), (255, 140, 0)]) 
         }
 
     def draw_text(self, text, font, color, center):
+
         """Desenha um texto centralizado."""
-        if not isinstance(text, str):  # Garantir que o texto seja uma string
+
+        if not isinstance(text, str): 
             text = str(text)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=center)
         self.screen.blit(text_surface, text_rect)
 
     def draw_menu(self):
-        # Desenhar fundo (agora estático)
+
+        # Desenhar fundo
         self.screen.blit(self.background_image, (0, 0))
 
-        # Título (sem animação de escala)
+        # Título
         title_text = "BOMBERMAN"
         title_font = pygame.font.Font(None, 100)
         title_surf = title_font.render(title_text, True, (255, 255, 0))
@@ -88,7 +95,8 @@ class Menu:
         # Animação da bomba
         current_time = pygame.time.get_ticks()
         if current_time - self.last_bomb_update > self.bomb_update_delay:
-            self.bomb_rotation = (self.bomb_rotation + 90) % 360  # Rotaciona 90 graus
+            # Rotaciona 90 graus
+            self.bomb_rotation = (self.bomb_rotation + 90) % 360  
             self.last_bomb_update = current_time
 
         # Desenhar bombas animadas nos lados do título
@@ -151,7 +159,9 @@ class Menu:
             self.menu_positions.append(text_rect)
 
     def menu_loop(self):
+
         """Loop do menu principal."""
+
         while True:
             current_time = pygame.time.get_ticks()
             for event in pygame.event.get():
@@ -206,7 +216,9 @@ class Menu:
             pygame.display.flip()
 
     def connection_screen(self):
+
         """Tela para digitar IP, porta e nome do personagem."""
+        
         ip = self.default_ip
         port = str(self.default_port)
         name = ""
@@ -339,7 +351,7 @@ class Menu:
             "Gabriel Afonso Barbosa",
             "Yury Araujo",
             "Igor Augusto",
-            "Michele",
+            "Michelle",
             "Miller",
             "Pedro",
             "",  

@@ -72,17 +72,21 @@ MAX_WINS = 3
 
 # Tipos de dados enviados ao servidor
 
-# Tipo de dado para atualização do estado do jogador
-DATA_TYPE_PLAYER_UPDATE = "player_update"  
-
-# Tipo de dado para informações sobre as bombas no jogo
-DATA_TYPE_BOMB = "bomb"  
-
-# Tipo de dado para atualizações do grid de jogo
-DATA_TYPE_GRID_UPDATE = "grid_update"  
-
-# Tipo de dado para informações gerais do jogador
-DATA_TYPE_PLAYER_DATA = "player_data"  
+MESSAGE_TYPES = {
+    "CONNECT": "CONNECT",
+    "GET_STATE": "GET_STATE",
+    "START": "START",
+    "GAME_IN_PROGRESS": "GAME_IN_PROGRESS",
+    "FULL": "FULL",
+    "DISCONNECTED": "DISCONNECTED",
+    "BOMB": "BOMB",
+    "UPDATE": "UPDATE",
+    "GRID_UPDATE": "GRID_UPDATE",
+    "WIN": "WIN",
+    "ROUND_RESET": "ROUND_RESET",
+    "ELIMINATED": "ELIMINATED",
+    "GAME_OVER": "GAME_OVER"
+}
 
 # Dados padrão da bomba
 

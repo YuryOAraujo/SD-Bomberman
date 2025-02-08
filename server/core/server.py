@@ -8,29 +8,6 @@ from config.constants import *
 
 import threading
 
-MESSAGE_TYPES = {
-    "CONNECT": "CONNECT",
-    "GET_STATE": "GET_STATE",
-    "START": "START",
-    "GAME_IN_PROGRESS": "GAME_IN_PROGRESS",
-    "FULL": "FULL",
-    "DISCONNECTED": "DISCONNECTED",
-    "BOMB": "BOMB",
-    "UPDATE": "UPDATE",
-    "GRID_UPDATE": "GRID_UPDATE",
-    "WIN": "WIN",
-    "ROUND_RESET": "ROUND_RESET",
-    "ELIMINATED": "ELIMINATED",
-    "GAME_OVER": "GAME_OVER"
-}
-
-PLAYER_POSITIONS = [
-    (48, 48),
-    (624, 48),
-    (48, 624),
-    (624, 624)
-]
-
 class Server:
 
     """Gerencia as mensagens e interações dos clientes."""
@@ -58,13 +35,6 @@ class Server:
 
         with self.lock:
             self.game_in_progress = True
-
-    def end_game(self):
-
-        """Finaliza o jogo e permite novas conexões."""
-
-        with self.lock:
-            self.game_in_progress = False
 
     def start(self):
 
@@ -189,10 +159,20 @@ class Server:
             print(f"Cliente {client_id} desconectado: {addr}")
             response = {
                 "type": MESSAGE_TYPES["DISCONNECTED"],
+                "player_id": client_id
             }
             
-            self.network.send_message(response, addr)
-    
+            self.network.broadcast(response, addr)
+
+        # Verifica se restou apenas um jogador
+        with self.lock:
+            remaining_players = list(self.network.clients.keys())
+            
+            if len(remaining_players) == 1:
+                winner_id = remaining_players[0]
+                self._reset_game_all(addr, winner_id)
+                
+                
     def handle_update(self, data, addr):
 
         """Atualiza os outros clientes sobre a posição, direção e nome do jogador."""
@@ -338,16 +318,15 @@ class Server:
             "players": self.player_data, 
         }
 
-        self.network.broadcast(game_over_message, addr, send=True)
-
-        print("Reset all")
+        self.network.broadcast(game_over_message, addr, send=True) 
 
         """Reinicia completamente o jogo após um jogador vencer 3 vezes."""
 
         self.player_data.clear()
         self.player_wins = [0] * self.network.max_clients
         self.current_round = 1
-        self.network.disconnect_all()
-        self.map_manager.reset_grid()
-        self.end_game()
+        self.map_manager = MapManager(random.choice(STAGES))
+        self.game_in_progress = False
+        print("Reset all")
         print("Jogo reiniciado!")
+        self.network.disconnect_all()

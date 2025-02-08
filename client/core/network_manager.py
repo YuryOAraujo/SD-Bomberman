@@ -1,24 +1,11 @@
 import socket
 import pickle
 
-MESSAGE_TYPES = {
-    "CONNECT": "CONNECT",
-    "GET_STATE": "GET_STATE",
-    "START": "START",
-    "GAME_IN_PROGRESS": "GAME_IN_PROGRESS",
-    "FULL": "FULL",
-    "DISCONNECTED": "DISCONNECTED",
-    "BOMB": "BOMB",
-    "UPDATE": "UPDATE",
-    "GRID_UPDATE": "GRID_UPDATE",
-    "WIN": "WIN",
-    "ELIMINATED": "ELIMINATED",
-    "GAME_OVER": "GAME_OVER"
-}
+from config.constants import *
 
 class NetworkManager:
 
-    def __init__(self, ip='127.0.0.1', port=5555, player_name=""):
+    def __init__(self, ip=SERVER_IP, port=SERVER_PORT, player_name=""):
 
         self.ip = ip
         self.port = port
@@ -39,19 +26,19 @@ class NetworkManager:
         
         # Espera pela resposta do servidor
         data, _ = self.client_socket.recvfrom(1024)
+
         try:
             # Desserializa a mensagem com pickle
             data = pickle.loads(data)  
 
-            # Verifica se a mensagem é um dicionário e contém o ID
             if isinstance(data, dict):
 
                 message_type = data["type"]
                 
                 if message_type == MESSAGE_TYPES["CONNECT"]:
                     self.player_id = data["id"]
-
                 return data    
+            
         except pickle.UnpicklingError:
             print("Erro ao deserializar a mensagem.")
         return None
@@ -78,6 +65,7 @@ class NetworkManager:
     def get_state(self):
 
         """Desconecta do servidor."""
+
         if self.player_id is not None:
             message = {"type": MESSAGE_TYPES["GET_STATE"]}
             self.send_message(message)
@@ -85,7 +73,8 @@ class NetworkManager:
         data, _ = self.client_socket.recvfrom(1024)
 
         try:
-            # Desserializa a mensagem com pickle
+
+            # Desserializa a mensagem com pickl
             data = pickle.loads(data)  
 
             # Verifica se a mensagem é um dicionário e contém o ID
@@ -100,6 +89,7 @@ class NetworkManager:
     def disconnect(self):
 
         """Desconecta do servidor."""
+        
         if self.player_id is not None:
             message = {"type": MESSAGE_TYPES["DISCONNECTED"]}
             self.send_message(message)

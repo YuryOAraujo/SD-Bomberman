@@ -13,22 +13,12 @@ import queue
 
 from player.player_manager import PlayerManager
 from bomb.bomb_manager import BombManager
+
 from ui.game_ui import GameUI
 from ui.waiting_screen import WaitingScreen
 from ui.winner_screen import WinnerScreen
+from ui.error_window import show_error_window
 
-MESSAGE_TYPES = {
-    "START": "START",
-    "GAME_IN_PROGRESS": "GAME_IN_PROGRESS",
-    "UPDATE": "UPDATE",
-    "FULL": "FULL",
-    "BOMB": "BOMB",
-    "GRID_UPDATE": "GRID_UPDATE",
-    "WIN": "WIN",
-    "ELIMINATED": "ELIMINATED",
-    "ROUND_RESET": "ROUND_RESET",
-    "GAME_OVER": "GAME_OVER"
-}
 
 class Game:
 
@@ -104,13 +94,13 @@ class Game:
         message_type = message.get("type")
                 
         if message_type == MESSAGE_TYPES["GAME_IN_PROGRESS"]:
-            print("Jogo em progresso, tente mais tarde")
+            show_error_window("Jogo em progresso, tente mais tarde")
             return None
         elif message_type == MESSAGE_TYPES["FULL"]:
-            print("Servidor cheio. Conexão recusada.")
+            show_error_window("Servidor cheio. Conexão recusada.")
             return None
         elif message is None:
-            print("Erro ao conectar ao servidor.")
+            show_error_window("Erro ao conectar ao servidor.")
             return None
         
         return message
@@ -248,7 +238,9 @@ class Game:
             message = self.message_queue.get() 
             message_type = message.get("type")
             
-            if message_type == MESSAGE_TYPES["UPDATE"]:
+            if message_type == MESSAGE_TYPES["DISCONNECTED"]:
+                self.player_manager.eliminate_player(message["player_id"])
+            elif message_type == MESSAGE_TYPES["UPDATE"]:
                 self.player_manager.player_data = message["players"]
             elif message_type == MESSAGE_TYPES["BOMB"]:
                 self.bomb_manager.add_bomb(message)
@@ -256,7 +248,7 @@ class Game:
                 self.map.grid = message["grid"]
                 self.map.draw_static_map()
             elif message_type == MESSAGE_TYPES["ELIMINATED"]:
-                pass
+                self.player_manager.eliminate_player(message["player_id"])
             elif message_type == MESSAGE_TYPES["ROUND_RESET"]:
                 self.elapsed_rounds = message["round"]
                 print(f'Current round: {self.elapsed_rounds}')
@@ -270,7 +262,6 @@ class Game:
                 self.player_manager.player_data = message["players"]
                 self.game_ui.update_players_data(self.player_manager.players)
                 self.winner = message["winner_id"]
-
                 return False
         
         return True

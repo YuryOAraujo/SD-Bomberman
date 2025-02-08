@@ -2,11 +2,13 @@ import socket
 import threading
 import pickle
 
+from config.constants import *
+
 class NetworkServer:
 
     """Gerencia a comunicação de rede UDP do servidor."""
     
-    def __init__(self, host='127.0.0.1', port=5555, max_clients=4):
+    def __init__(self, host=SERVER_IP, port=SERVER_PORT, max_clients=MAX_PLAYERS):
 
         self.host = host
         self.port = port
