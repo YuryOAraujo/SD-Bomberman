@@ -1,0 +1,177 @@
+/* Estilos gerais */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+}
+
+p{
+    color: #fff;
+}
+
+li{
+    color: #fff;
+}
+
+h1, h2, h3 {
+    color: #fbbf24;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #fbbf24;
+    color: #000;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: #fbbf24;
+    border: 2px solid #fbbf24;
+}
+
+.btn-primary:hover {
+    background-color: #f59e0b;
+}
+
+.btn-secondary:hover {
+    background-color: #fbbf24;
+    color: #000;
+}
+
+/* Hero section */
+.hero {
+    background-image: url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-VJh5yQitLh6wmasAcMza5L1AQS8HrK.png');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+}
+
+.hero-content {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 10px;
+}
+
+.hero h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.cta-buttons {
+    margin-top: 2rem;
+}
+
+/* Features section */
+#features {
+    padding: 4rem 2rem;
+    background-color: #222;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background-color: #2a2a2a;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+}
+
+/* Gameplay section */
+#gameplay {
+    padding: 4rem 2rem;
+    background-color: #1a1a1a;
+}
+
+.gameplay-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: center;
+}
+
+.gameplay-image {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.gameplay-text {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Team section */
+#team {
+    padding: 4rem 2rem;
+    background-color: #222;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.team-card {
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.team-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.team-card a {
+    color: #fbbf24;
+    text-decoration: none;
+}
+
+/* Footer */
+footer {
+    background-color: #1a1a1a;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 3rem;
+    }
+
+    .gameplay-content {
+        flex-direction: column;
+    }
+}
