@@ -5,15 +5,15 @@ Welcome to **Bomberman**, an explosive multiplayer game where strategy and timin
 ## 🚀 Features
 - 🎩 **Local Multiplayer**: Play with up to 4 players on the same screen.
 - 🔥 **Classic Gameplay**: Mechanics faithful to the original Bomberman.
-- 🌍 **Online Mode**: Connect with players from around the world.
+- 🌍 **Online Mode**: Connect up to four players.
 - 💻 **Open Source**: Developed in **Python with Pygame**.
 
 ## 📸 Screenshots
 <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-A5ZlTS5WKw0vMOxO0WNm8jhnohvFAB.png" width="600" alt="Bomberman Gameplay">
 
 ## 🛠️ Technologies Used
-- **HTML, CSS, and JavaScript** (Frontend)
-- **Python with Pygame** (Game Backend)
+- **Python with Pygame** (Game)
+- **UDP Sockets** (Multiplayer Features)
 
 ## 💂‍♂️ Project Structure
 ```
