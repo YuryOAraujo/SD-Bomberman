@@ -192,9 +192,7 @@ class Menu:
                             ip, port, name = self.connection_screen()
                             if ip and port and name:
                                 from core.game import Game
-                                game = Game(ip, int(port))
-                                game.player_manager.local_player.name = name  # Define o nome do jogador local
-                                game.run()
+                                game = Game(ip, int(port), name)
                                 pygame.quit()
                                 pygame.init()
                                 self.__init__()
@@ -402,7 +400,3 @@ class Menu:
 
             pygame.display.flip()
             pygame.time.wait(20)  # Pequena pausa para controlar a velocidade de rolagem
-
-# Iniciar menu principal
-menu = Menu()
-menu.menu_loop()

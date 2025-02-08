@@ -3,7 +3,9 @@ import math
 from config.constants import *
 
 class GameUI:
+
     def __init__(self, screen, players, ui_width, map_width, trophy_image_path):
+
         self.screen = screen
         self.players = players
         self.ui_width = ui_width
@@ -29,7 +31,9 @@ class GameUI:
         self.text_color = (255, 255, 255)  # Branco
 
     def draw_panel(self, rect, title=None):
+
         """Desenha um painel estilizado com borda arredondada"""
+        
         pygame.draw.rect(self.screen, self.panel_color, rect, border_radius=10)
         pygame.draw.rect(self.screen, self.highlight_color, rect, 2, border_radius=10)
         
@@ -38,7 +42,18 @@ class GameUI:
             title_rect = title_surf.get_rect(midtop=(rect.centerx, rect.top + 5))
             self.screen.blit(title_surf, title_rect)
 
+    def update_players_data(self, new_player_data):
+        
+        """
+        Atualiza todas as informações dos jogadores no meio do jogo.
+
+        Args:
+            new_player_data (dict): Um dicionário contendo os dados atualizados de todos os jogadores.
+        """
+        self.players = new_player_data  # Atualiza a referência para os novos jogadores
+
     def draw(self):
+        
         # Fundo principal
         pygame.draw.rect(self.screen, self.bg_color, (self.map_width, 0, self.ui_width, HEIGHT))
 

@@ -21,6 +21,7 @@ class Player(pygame.sprite.Sprite):
         """
 
         super().__init__()
+        
         self.player_id = player_id
 
         # Carrega as animações do jogador
@@ -259,7 +260,9 @@ class Player(pygame.sprite.Sprite):
             bomb = self.player_input(obstacles)
             if bomb:
                 return bomb
+            
         self.update_animation()
+        
         return None
 
     def reset_bombs(self) -> None:
@@ -271,9 +274,9 @@ class Player(pygame.sprite.Sprite):
         self.bombs_placed = 0
 
     def eliminate(self) -> None:
-
+        
         """
-        Marca o jogador como eliminado e para qualquer movimento adicional.
+        Marca o jogador como eliminado e remove a sprite da tela.
         """
 
         self.eliminated = True

@@ -84,7 +84,7 @@ class BombManager:
                             if player.rect.colliderect(explosion_rect):
                                 player.eliminate()
                                 last_eliminated_player = player
-                                print(f"Player {player.player_id} has been eliminated!")
+                                
         return last_eliminated_player
 
     def reset_bombs(self):

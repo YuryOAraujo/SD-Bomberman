@@ -1,13 +1,6 @@
 import pygame
 from player.player import Player
 
-player_positions = [
-    (48, 48),
-    (624, 48),
-    (48, 624),
-    (624, 624)
-]
-
 class PlayerManager:
 
     """
@@ -18,7 +11,7 @@ class PlayerManager:
     e os outros jogadores, com base nos dados recebidos da rede.
     """
         
-    def __init__(self, network_client):
+    def __init__(self, network_client, player_data):
 
         """
         Inicializa o gerenciador de jogadores.
@@ -30,9 +23,9 @@ class PlayerManager:
         self.players = pygame.sprite.Group()
         self.local_player = None
         self.network_client = network_client
-        self.player_data = []
+        self.player_data = player_data
 
-    def initialize_players(self, wins):
+    def initialize_players(self):
 
         """
         Inicializa os jogadores e define o jogador local com base no ID fornecido pelo servidor.
@@ -41,11 +34,15 @@ class PlayerManager:
         na posição inicial correspondente. Define o jogador local com base no `player_id`
         do cliente de rede.
         """
-        for i in range(4):
-            player = Player(i + 1, initial_position=player_positions[i])
-            player.round_wins = wins[player.player_id - 1]
+        for player_id, player_data in self.player_data.items():
+            position = player_data['position']
+            name = player_data['name']
+            player = Player(player_id, initial_position=position)
+            player.round_wins = 0
+            player.name = name
             self.players.add(player)
-        self.local_player = list(self.players)[self.network_client.player_id]
+
+        self.local_player = list(self.players)[self.network_client.player_id - 1]
 
     def update_players(self):
 
@@ -56,13 +53,36 @@ class PlayerManager:
         de acordo com as informações disponíveis em `player_data`.
         """
 
-        for i, data in enumerate(self.player_data):
-            if i != self.network_client.player_id:
-                player = list(self.players)[i]
-                player.set_position(data["position"])
-                player.direction = data["direction"]
+        for player_id, player_data in self.player_data.items():
+
+            position = player_data['position']
+            direction = player_data['direction']
+            
+            if player_id != self.network_client.player_id:
+                player = list(self.players)[player_id - 1]
+                player.set_position(position)
+                player.direction = direction
+                
                 player.update()
 
+    def update_player_all(self):
+
+        """
+        Atualiza todos os dados dos jogadores com base nas informações da rede.
+        """
+
+        for player_id, player_data in self.player_data.items():
+
+            position = player_data['position']
+            direction = player_data['direction']
+            round_wins = player_data['round_wins']
+            
+            player = list(self.players)[player_id - 1]
+            player.set_position(position)
+            player.direction = direction
+            player.round_wins = round_wins                
+            player.update()
+        
     def reset_players(self):
 
         """
@@ -72,10 +92,51 @@ class PlayerManager:
         """
         
         for player in self.players:
-            player.rect.topleft = player_positions[player.player_id - 1]
             player.eliminated = False
             player.reset_bombs()
-    
-    def update_players_wins(self, wins):
+
+    def update_player_data(self):
+
+        """
+            Atualiza o dicionário player_data com as informações atuais dos jogadores.
+
+            Percorre todos os jogadores e armazena suas posições e direções no player_data.
+        """
+
         for player in self.players:
-            player.round_wins = wins[player.player_id - 1]
+            self.player_data[player.player_id] = {
+                'position': player.rect.topleft,
+                'direction': player.direction,
+                'name': player.name,
+                'round_wins': player.round_wins
+            }
+
+    def eliminate_player(self, player_id: int) -> None:
+
+        """
+        Elimina um jogador específico com base no player_id.
+
+        Args:
+            player_id (int): ID do jogador a ser eliminado.
+        """
+        for player in self.players:
+            if player.player_id == player_id:
+                player.eliminate()
+                break
+
+    def get_player_by_id(self, player_id: int):
+
+        """
+        Retorna um jogador com base no ID fornecido.
+
+        Args:
+            player_id (int): O ID do jogador a ser buscado.
+
+        Returns:
+            Player: A instância do jogador correspondente ao ID ou None se não for encontrado.
+        """
+        
+        for player in self.players:
+            if player.player_id == player_id:
+                return player
+        return None

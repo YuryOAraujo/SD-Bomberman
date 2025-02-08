@@ -1,16 +1,8 @@
-import pygame
-import sys
+
+from core.game import Game
 from ui.menu import Menu
 
-def main():
-    # Inicializa o Pygame
-    pygame.init()
-
-    # Cria uma instância do menu
-    menu = Menu()
-
-    # Inicia o loop do menu
-    menu.menu_loop()
-
 if __name__ == "__main__":
-    main()
+   # Iniciar menu principal
+    menu = Menu()
+    menu.menu_loop()

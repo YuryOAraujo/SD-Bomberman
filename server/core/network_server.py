@@ -1,125 +1,92 @@
 import socket
+import threading
 import pickle
 
 class NetworkServer:
 
-    """
-    A classe NetworkServer gerencia o servidor de rede para um jogo multiplayer,
-    fornecendo métodos para aceitar conexões de jogadores, enviar e receber dados.
-    """
-
-    def __init__(self, host, port, max_players):
-
-        """
-        Inicializa o servidor de rede com o endereço do host, porta e o número máximo de jogadores permitidos.
-
-        Args:
-            host (str): O endereço IP do servidor (geralmente '127.0.0.1' para localhost).
-            port (int): A porta em que o servidor irá escutar por conexões.
-            max_players (int): O número máximo de jogadores que podem se conectar ao servidor.
-        """
+    """Gerencia a comunicação de rede UDP do servidor."""
+    
+    def __init__(self, host='127.0.0.1', port=5555, max_clients=2):
 
         self.host = host
         self.port = port
-        self.max_players = max_players
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server.bind((self.host, self.port))
-        self.server.listen(self.max_players)
-        self.clients = []
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_socket.bind((self.host, self.port))
+        self.clients = {}
+        self.lock = threading.Lock()
+        self.max_clients = max_clients
 
-    def accept_connections(self, on_connect_callback):
+    def start_listening(self, message_handler):
 
-        """
-        Aceita as conexões dos clientes, adicionando-os à lista de clientes conectados.
-        Chama o callback fornecido sempre que um jogador se conecta.
+        """Inicia a escuta de mensagens e chama o handler para processá-las."""
 
-        Args:
-            on_connect_callback (function): Função callback que é chamada quando um cliente se conecta.
-                A função recebe dois parâmetros: o cliente conectado e o índice do cliente na lista.
-        """
+        print(f"Servidor UDP iniciado em {self.host}:{self.port}")
 
-        print("Waiting for connections...")
         while True:
-            if len(self.clients) < self.max_players:
-                client, addr = self.server.accept()
-                print(f"Player connected from {addr}")
-                self.clients.append(client)
-                on_connect_callback(client, len(self.clients) - 1)
+            data, addr = self.server_socket.recvfrom(1024)
+            try:
+                data = pickle.loads(data) 
+                message_handler(data, addr)
+            except pickle.UnpicklingError:
+                print("Erro ao desserializar a mensagem.")
 
-    def send_data(self, client, data):
+    def send_message(self, message, addr):
 
-        """
-        Envia dados para um cliente específico após serializá-los com pickle.
-
-        Args:
-            client (socket.socket): O socket do cliente para o qual os dados serão enviados.
-            data (any): Os dados a serem enviados para o cliente.
-
-        Exceções:
-            BrokenPipeError, ConnectionResetError: Ocorrem se a conexão com o cliente for interrompida.
-            pickle.PickleError: Ocorre se houver um erro ao serializar os dados.
-        """
+        """Envia uma mensagem para um cliente específico."""
 
         try:
-            client.send(pickle.dumps(data))
-        except (BrokenPipeError, ConnectionResetError) as e:
-            print(f"Error sending to client: {e}")
-            self.clients.remove(client)
-        except pickle.PickleError as e:
-            print(f"Serialization error: {e}")
+            serialized_message = pickle.dumps(message) 
+            self.server_socket.sendto(serialized_message, addr)
+        except pickle.PicklingError:
+            print("Erro ao serializar a mensagem.")
 
-    def broadcast(self, data):
+    def broadcast(self, message, sender_addr, send=False):
 
-        """
-        Envia os dados para todos os clientes conectados.
+        """Envia uma mensagem para todos os clientes. 
+        Se send=True, também envia para o remetente."""
 
-        Args:
-            data (any): Os dados a serem enviados para todos os clientes.
-        """
+        with self.lock:
+            for client_id, client_addr in self.clients.items():
+                if send or client_addr != sender_addr:
+                    self.send_message(message, client_addr)
 
-        for client in self.clients[:]:
-            self.send_data(client, data)
+    def register_client(self, addr):
 
-    def receive_data(self, client):
+        """Registra um novo cliente e retorna seu ID."""
 
-        """
-        Recebe dados de um cliente, tratando possíveis erros de desconexão.
-
-        Args:
-            client (socket.socket): O socket do cliente de onde os dados serão recebidos.
-
-        Retorna:
-            any: Os dados recebidos e desserializados do cliente, ou None em caso de erro.
-        """
-
-        try:
-            raw_data = client.recv(4096)
-
-            if not raw_data:  # Cliente fechou a conexão
-                print("Client disconnected.")
-                self.clients.remove(client)
-                client.close()
-                return None
-
-            return pickle.loads(raw_data)
-
-        except (EOFError, ConnectionResetError) as e:
-            print(f"Client disconnected: {e}")
-            self.clients.remove(client)
-            client.close()
+        with self.lock:
+            client_id = self.get_next_client_id()
+            if client_id is not None:
+                self.clients[client_id] = addr
+                return client_id
             return None
 
-        except pickle.UnpicklingError as e:
-            print(f"Failed to decode data from client: {e}")
-            return None
+    def unregister_client(self, addr):
 
-    def close(self):
+        """Remove um cliente da lista de ativos."""
 
-        """
-        Fecha as conexões com todos os clientes e o servidor.
-        """
+        with self.lock:
+            for client_id, client_addr in list(self.clients.items()):
+                if client_addr == addr:
+                    del self.clients[client_id]
+                    return client_id
+        return None
+
+    def get_next_client_id(self):
+
+        """Retorna um ID disponível para um novo cliente."""
+
+        for i in range(1, self.max_clients + 1):
+            if i not in self.clients:
+                return i
+            
+        return None
+    
+    def disconnect_all(self):
+
+        """Desconecta todos os clientes sem enviar mensagens."""
         
-        for client in self.clients:
-            client.close()
-        self.server.close()
+        with self.lock:
+            self.clients.clear()
+
+
