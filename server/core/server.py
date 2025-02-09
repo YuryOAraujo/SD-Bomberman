@@ -223,6 +223,7 @@ class Server:
                         "position": data["position"],
                         "player_id": data["player_id"],
                         "planted": data["planted"],
+                        "explosion_range": data["explosion_range"]
                     }
 
         self.network.broadcast(bomb_data, addr)
@@ -259,10 +260,11 @@ class Server:
         """
 
         position = bomb_data["position"]
+        explosion_range = bomb_data["explosion_range"]
 
         # Sincronize acesso ao estado compartilhado (bombs, grid)
         with self.lock:
-            self.map_manager.destroy_boxes_around(position)
+            self.map_manager.destroy_boxes_around(position, explosion_range)
 
         # Atualizar o grid para todos os clientes
         grid_data = {

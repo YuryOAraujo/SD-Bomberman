@@ -205,6 +205,7 @@ class Game:
             "position": bomb.rect.topleft,
             "player_id": bomb.player_id,
             "planted": bomb.planted,
+            "explosion_range": self.player_manager.local_player.explosion_range
         }
 
         self.network.send_message(data)
@@ -254,13 +255,18 @@ class Game:
                 self.player_manager.eliminate_player(message["player_id"])
 
             elif message_type== MESSAGE_TYPES["UPDATE_POWER"]:
+                self.player_manager.apply_power(message["player_id"], message["power"])
                 self.update_map(message)
 
             elif message_type == MESSAGE_TYPES["ROUND_RESET"]:
-                self.reset_round()
-                
+                self.reset_round(message)
+
             elif message_type == MESSAGE_TYPES["GAME_OVER"]:
-                return self.game_over(message)
+                self.elapsed_rounds = message["round"]
+                self.player_manager.player_data = message["players"]
+                self.game_ui.update_players_data(self.player_manager.players)
+                self.winner = message["winner_id"]
+                return False
         
         return True
 
@@ -299,10 +305,3 @@ class Game:
         self.last_position = (0, 0)
 
         self.map.draw_static_map() 
-
-    def game_over(self, message):
-        self.elapsed_rounds = message["round"]
-        self.player_manager.player_data = message["players"]
-        self.game_ui.update_players_data(self.player_manager.players)
-        self.winner = message["winner_id"]
-        return False

@@ -42,10 +42,17 @@ class Player(pygame.sprite.Sprite):
         self.bombs_placed = 0
         self.max_bombs = 1
         self.explosion_range = 1
-
+        self.number_bombs = 1
+        self.number_bombs_power = 1
+        
         # Estado do jogador
         self.eliminated = False
         self.round_wins = 0
+
+        """
+            Um jogador sem poder só pode plantar uma bomba por vez, se tiver o poder pode plantar uma bomba mesmo se a outra não explodiu ainda
+        """
+        self.has_extra_bomb_power = False
 
     def load_animations(self) -> dict:
 
@@ -88,11 +95,24 @@ class Player(pygame.sprite.Sprite):
             None: Caso o jogador já tenha colocado o número máximo de bombas.
         """
 
+        if self.has_extra_bomb_power:
 
-        if self.bombs_placed < self.max_bombs:
-            bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
-            self.bombs_placed += 1
-            return bomb
+            # Se o jogador tem o poder, pode plantar até max_bombs simultaneamente
+            print("\n\t - Número poderes: [não muda]: ",self.number_bombs_power)
+            print("\n\t - Número de bombas: [muda toda vez que o usuário colocar uma bomba]: ", self.number_bombs)
+
+            if self.number_bombs != 0:
+                self.bombs_placed += 1
+                self.number_bombs -= 1
+                bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
+                
+                return bomb
+        else:
+            if self.bombs_placed == 0:
+                self.bombs_placed += 1
+                bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
+                return bomb
+            
         return None
 
     def align_to_grid(self) -> None:
@@ -224,6 +244,26 @@ class Player(pygame.sprite.Sprite):
             self.image = self.animations[self.direction][int(self.frame_index)]
         else:
             self.image = self.animations[self.direction][0]
+    
+    def apply_power(self, power_code):
+
+        """
+        Aplica o poder ao jogador com base no código do poder.
+
+        Args:
+            power_code (int): Código do poder (3: flame, 4: bomb, 5: speed).
+        """
+
+        if power_code == 3:  
+            self.explosion_range += 1
+        elif power_code == 4:
+            self.has_extra_bomb_power = True
+            self.number_bombs_power += 1
+            self.number_bombs += 1
+        elif power_code == 5:
+            self.speed += 1
+        else:
+            print(f"Código de poder inválido: {power_code}")
 
     def set_position(self, new_position) -> None:
         

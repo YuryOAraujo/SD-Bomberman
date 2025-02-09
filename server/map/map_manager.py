@@ -19,8 +19,8 @@ class MapManager:
         # 3: flame, 4: bomb 5: speed
         self.powers = [3, 4, 5]  
 
-        # Quantidade de cada poder (exemplo: 3 chama, 3 bomba, 4 velocidade)
-        self.power_count = {3: 3, 4: 3, 5: 4}  
+        # Quantidade de cada poder (exemplo: 3 chama, 3 bomba, 3 velocidade)
+        self.power_count = {3: 0, 4: 8, 5: 0}  
 
         # Armazena as posições dos poderes
         self.power_positions = []  
@@ -101,7 +101,7 @@ class MapManager:
 
     def destroy_boxes_around(self, position, radius=1):
 
-        """Destrói as caixas ao redor de uma posição (apenas blocos destrutíveis, acima, abaixo, esquerda e direita)."""
+        """Destrói as caixas ao redor de uma posição dentro do alcance da bomba."""
 
         x = position[0] // (SPRITE_WIDTH * SCALE)  
         y = position[1] // (SPRITE_HEIGHT * SCALE) 
@@ -109,16 +109,29 @@ class MapManager:
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
         for dx, dy in directions:
+            
+            # Itera conforme o alcance da bomba
+            for i in range(1, radius + 1):  
 
-            nx, ny = x + dx, y + dy
+                nx, ny = x + dx * i, y + dy * i
 
-            if 0 <= ny < len(self.grid) and 0 <= nx < len(self.grid[ny]):
-                if self.grid[ny][nx] == 2: 
-                    self.grid[ny][nx] = 0  
+                # Verifica se a posição está dentro dos limites do grid
+                if 0 <= ny < len(self.grid) and 0 <= nx < len(self.grid[ny]):
+                     # Verifica se é um bloco destrutível
+                    if self.grid[ny][nx] == 2: 
+                        self.grid[ny][nx] = 0  # Destroi o bloco
+                        
+                        # Se houver um poder naquela posição, coloca-o no mapa
+                        if (ny, nx) in self.power_positions:
+                            self.place_power((ny, nx))
                     
-                     # Se houver um poder naquela posição, coloca-o no mapa
-                    if (ny, nx) in self.power_positions:
-                        self.place_power((ny, nx))
+                    # Se for um bloco indestrutível, para
+                    elif self.grid[ny][nx] != 0:  
+                        break
+
+                # Se estiver fora dos limites do grid, para de iterar nessa direção
+                else:
+                    break
 
     def check_power_up(self, position):
 

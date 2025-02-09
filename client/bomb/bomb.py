@@ -27,6 +27,7 @@ class Bomb(pygame.sprite.Sprite):
         super().__init__()
         self.player_id = player_id
         self.player = player
+
         self.timer = timer
         self.explosion_range = player.explosion_range
         self.planted = time.time()
@@ -128,6 +129,7 @@ class Bomb(pygame.sprite.Sprite):
             "up": (0, -1),
             "down": (0, 1),
         }
+
         explosion_tiles = [((self.x, self.y), "center")]
 
         for direction, (dx, dy) in directions.items():
@@ -248,6 +250,10 @@ class Bomb(pygame.sprite.Sprite):
 
         if time.time() - self.planted >= self.timer + 1:
             self.player.bombs_placed -= 1
+
+            if self.player.has_extra_bomb_power:
+                self.player.number_bombs += 1
+
             self.kill()
 
     def update(self, surface):

@@ -137,6 +137,19 @@ class PlayerManager:
                 player.eliminate()
                 break
 
+    def apply_power(self, player_id: int, power_id: int) -> None:
+
+        """
+        Elimina um jogador específico com base no player_id.
+
+        Args:
+            player_id (int): ID do jogador a ser eliminado.
+        """
+        for player in self.players:
+            if player.player_id == player_id:
+                player.apply_power(power_id)
+                break
+
     def get_player_by_id(self, player_id: int):
 
         """
