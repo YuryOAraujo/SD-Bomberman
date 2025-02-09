@@ -181,8 +181,11 @@ class Server:
 
         if player_id is not None:
 
+            position = data["position"]
+
+
             self.player_data[player_id] = {
-                "position": data["position"],
+                "position": position,
                 "direction": data["direction"],
             }
 
@@ -193,6 +196,22 @@ class Server:
             }
 
             self.network.broadcast(update_message, addr)
+        
+        self.handle_power(position, player_id, addr)
+
+    def handle_power(self, position, player_id, addr):
+
+        power = self.map_manager.check_power_up(position)
+
+        if power is not None:
+            power_message = {
+                "type": MESSAGE_TYPES["UPDATE_POWER"],
+                "player_id": player_id,
+                "power": power,
+                "grid": self.map_manager.get_grid()
+            }
+
+            self.network.broadcast(power_message, addr, send=True)
 
     def handle_bomb(self, data, addr):
 

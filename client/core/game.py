@@ -240,29 +240,27 @@ class Game:
             
             if message_type == MESSAGE_TYPES["DISCONNECTED"]:
                 self.player_manager.eliminate_player(message["player_id"])
+
             elif message_type == MESSAGE_TYPES["UPDATE"]:
                 self.player_manager.player_data = message["players"]
+
             elif message_type == MESSAGE_TYPES["BOMB"]:
                 self.bomb_manager.add_bomb(message)
+
             elif message_type == MESSAGE_TYPES["GRID_UPDATE"]:
-                self.map.grid = message["grid"]
-                self.map.draw_static_map()
+                self.update_map(message)
+
             elif message_type == MESSAGE_TYPES["ELIMINATED"]:
                 self.player_manager.eliminate_player(message["player_id"])
+
+            elif message_type== MESSAGE_TYPES["UPDATE_POWER"]:
+                self.update_map(message)
+
             elif message_type == MESSAGE_TYPES["ROUND_RESET"]:
-                self.elapsed_rounds = message["round"]
-                print(f'Current round: {self.elapsed_rounds}')
-                self.round_active = True
-                self.player_manager.player_data = message["players"]  
-                self.map.grid = message["grid"]
                 self.reset_round()
-                self.map.draw_static_map() 
+                
             elif message_type == MESSAGE_TYPES["GAME_OVER"]:
-                self.elapsed_rounds = message["round"]
-                self.player_manager.player_data = message["players"]
-                self.game_ui.update_players_data(self.player_manager.players)
-                self.winner = message["winner_id"]
-                return False
+                return self.game_over(message)
         
         return True
 
@@ -274,12 +272,23 @@ class Game:
             if message:
                 self.message_queue.put(message)
 
-    def reset_round(self):
+    def update_map(self, message):
+        self.map.grid = message["grid"]
+        self.map.draw_static_map()
+
+    def reset_round(self, message):
 
         """
         Reinicia o estado do jogo para uma nova rodada, incluindo
         a posição dos jogadores e bombas.
         """
+
+        self.elapsed_rounds = message["round"]
+        print(f'Current round: {self.elapsed_rounds}')
+        self.round_active = True
+        self.player_manager.player_data = message["players"]  
+        self.map.grid = message["grid"]
+
 
         self.bomb_manager.reset_bombs()
         self.player_manager.reset_players()
@@ -288,3 +297,12 @@ class Game:
         self.player_manager.update_player_all()
         self.game_ui.update_players_data(self.player_manager.players)
         self.last_position = (0, 0)
+
+        self.map.draw_static_map() 
+
+    def game_over(self, message):
+        self.elapsed_rounds = message["round"]
+        self.player_manager.player_data = message["players"]
+        self.game_ui.update_players_data(self.player_manager.players)
+        self.winner = message["winner_id"]
+        return False

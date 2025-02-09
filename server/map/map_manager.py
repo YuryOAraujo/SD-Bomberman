@@ -119,7 +119,33 @@ class MapManager:
                      # Se houver um poder naquela posição, coloca-o no mapa
                     if (ny, nx) in self.power_positions:
                         self.place_power((ny, nx))
-                        self.power_positions.remove((ny, nx))
+
+    def check_power_up(self, position):
+
+        """
+        
+        Verifica se há um poder na posição fornecida e o remove do mapa se existir.
+
+        Args:
+            position (tuple): Posição do jogador (x, y) em pixels.
+
+        Returns:
+            int: O tipo de poder (3, 4, 5) se houver um poder na posição, caso contrário None.
+
+        """
+        
+        # Converte a posição do jogador para coordenadas do grid
+        grid_x = position[0] // (SPRITE_WIDTH * SCALE)
+        grid_y = position[1] // (SPRITE_HEIGHT * SCALE)
+
+        # Verifica se há um poder na posição atual do jogador
+        if (grid_y, grid_x) in self.power_positions:
+            power = self.grid[grid_y][grid_x]
+            self.power_positions.remove((grid_y, grid_x))
+            self.grid[grid_y][grid_x] = 0  
+            return power
+
+        return None
 
     def get_grid(self):
 
