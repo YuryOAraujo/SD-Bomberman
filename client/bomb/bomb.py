@@ -250,10 +250,6 @@ class Bomb(pygame.sprite.Sprite):
 
         if time.time() - self.planted >= self.timer + 1:
             self.player.bombs_placed -= 1
-
-            if self.player.has_extra_bomb_power:
-                self.player.number_bombs += 1
-
             self.kill()
 
     def update(self, surface):

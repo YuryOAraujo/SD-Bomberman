@@ -19,8 +19,8 @@ class MapManager:
         # 3: flame, 4: bomb 5: speed
         self.powers = [3, 4, 5]  
 
-        # Quantidade de cada poder (exemplo: 3 chama, 3 bomba, 3 velocidade)
-        self.power_count = {3: 0, 4: 8, 5: 0}  
+        # Quantidade de cada poder (3 speed, 3 flame, 1 bomb)
+        self.power_count = {3: 3, 4: 1, 5: 3}
 
         # Armazena as posições dos poderes
         self.power_positions = []  
@@ -28,7 +28,7 @@ class MapManager:
         self.power_probabilities = self.calculate_power_probabilities()
 
         # Número de poderes
-        self.num_powers = 10  
+        self.num_powers = 7  
 
         # Distância mínima entre os poderes
         self.min_distance = 3  

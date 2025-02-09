@@ -42,8 +42,6 @@ class Player(pygame.sprite.Sprite):
         self.bombs_placed = 0
         self.max_bombs = 1
         self.explosion_range = 1
-        self.number_bombs = 1
-        self.number_bombs_power = 1
         
         # Estado do jogador
         self.eliminated = False
@@ -96,21 +94,13 @@ class Player(pygame.sprite.Sprite):
         """
 
         if self.has_extra_bomb_power:
-
-            # Se o jogador tem o poder, pode plantar até max_bombs simultaneamente
-            print("\n\t - Número poderes: [não muda]: ",self.number_bombs_power)
-            print("\n\t - Número de bombas: [muda toda vez que o usuário colocar uma bomba]: ", self.number_bombs)
-
-            if self.number_bombs != 0:
-                self.bombs_placed += 1
-                self.number_bombs -= 1
-                bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
-                
-                return bomb
+            bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
+            self.bombs_placed += 1
+            return bomb
         else:
-            if self.bombs_placed == 0:
-                self.bombs_placed += 1
+           if self.bombs_placed < self.max_bombs:
                 bomb = Bomb(self.rect.x, self.rect.y, self.player_id, self)
+                self.bombs_placed += 1
                 return bomb
             
         return None
@@ -258,8 +248,6 @@ class Player(pygame.sprite.Sprite):
             self.explosion_range += 1
         elif power_code == 4:
             self.has_extra_bomb_power = True
-            self.number_bombs_power += 1
-            self.number_bombs += 1
         elif power_code == 5:
             self.speed += 1
         else:
