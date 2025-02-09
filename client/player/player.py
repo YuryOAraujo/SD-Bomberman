@@ -293,6 +293,11 @@ class Player(pygame.sprite.Sprite):
         
         return None
 
+    def reset_powers(self) -> None:
+        self.speed = 4
+        self.has_extra_bomb_power = False
+        self.explosion_range = 1
+
     def reset_bombs(self) -> None:
 
         """

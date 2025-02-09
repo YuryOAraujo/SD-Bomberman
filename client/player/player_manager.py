@@ -107,6 +107,7 @@ class PlayerManager:
         for player in self.players:
             player.eliminated = False
             player.reset_bombs()
+            player.reset_powers()
 
     def update_player_data(self):
 

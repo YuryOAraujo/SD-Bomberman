@@ -127,7 +127,7 @@ class GameUI:
         self.screen.blit(round_footer_text, round_footer_rect)
 
         # Ícone de ajuda
-        help_icon = pygame.image.load(PATH_TROPHY)  # Supondo que há um ícone de ajuda
+        help_icon = pygame.image.load(PATH_ICON_INFO) 
         help_icon = pygame.transform.scale(help_icon, (32, 32))
         self.help_rect = help_icon.get_rect(midright=(self.map_width + self.ui_width - 50, HEIGHT - footer_height // 2))
         self.screen.blit(help_icon, self.help_rect)

@@ -54,6 +54,8 @@ PATH_BACKGROUND = "client/assets/background/Fundo.png"
 
 PATH_TROPHY = "client/assets/icons/trofeu.png"
 
+PATH_ICON_INFO = "client/assets/icons/information.png"
+
 # Configurações de rede
 
  # Endereço IP do servidor
