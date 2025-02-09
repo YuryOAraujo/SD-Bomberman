@@ -58,7 +58,10 @@ class Map:
         animations = {
             "floor": sprite_sheet.get_image(stage_data['floor'], 0, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
             "box": sprite_sheet.get_image(stage_data['box'], 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
-            "block": sprite_sheet.get_image(11, 4, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK)
+            "block": sprite_sheet.get_image(11, 4, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
+            "flame": sprite_sheet.get_image(6, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK), 
+            "bomb": sprite_sheet.get_image(7, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
+            "speed": sprite_sheet.get_image(8, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK)  
         }
 
         return animations
@@ -88,9 +91,9 @@ class Map:
                 elif self.grid[row][col] == 2:  # Caixa destrutível
                     boxes_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
                     self.obstacles[1].append(boxes_rect)
-        
+
     def draw_static_map(self):
-        
+
         """
         Desenha a superfície estática do mapa baseada no grid inicial.
 
@@ -119,7 +122,13 @@ class Map:
                     boxes_rect = pygame.Rect(x, y, SPRITE_WIDTH * SCALE, SPRITE_HEIGHT * SCALE)
                     self.obstacles[1].append(boxes_rect)
                     self.static_map_surface.blit(self.animations["box"], (x, y))
-        
+                elif self.grid[row][col] == 3:
+                    self.static_map_surface.blit(self.animations["flame"], (x, y))
+                elif self.grid[row][col] == 4:  
+                    self.static_map_surface.blit(self.animations["bomb"], (x, y))
+                elif self.grid[row][col] == 5: 
+                   self.static_map_surface.blit(self.animations["speed"], (x, y))
+
         # Atualiza a lista de obstáculos
         self.update_obstacles()
 
