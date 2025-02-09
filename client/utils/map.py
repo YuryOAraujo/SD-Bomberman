@@ -35,6 +35,26 @@ class Map:
         self.draw_static_map()
 
     @staticmethod
+    def load_power_animations() -> dict:
+        """
+        Carrega os sprites dos poderes a partir da spritesheet.
+
+        Returns:
+            dict: Dicionário contendo os sprites de cada poder, onde as 
+                chaves são os nomes dos poderes e os valores são as superfícies correspondentes.
+        """
+        sprite_sheet = SpriteSheet(pygame.image.load(PATH_SPRITES).convert_alpha())
+
+        power_animations = {
+            "flame": sprite_sheet.get_image(6, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
+            "bomb": sprite_sheet.get_image(7, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK),
+            "speed": sprite_sheet.get_image(8, 5, SPRITE_WIDTH, SPRITE_HEIGHT, SCALE, PINK)
+        }
+
+        return power_animations
+
+
+    @staticmethod
     def load_animation_map(self) -> dict:
 
         """

@@ -131,10 +131,11 @@ class Game:
 
                     self.screen.fill(WHITE)
                     self.map.draw_map(self.screen)
-                    self.game_ui.draw()
+                    self.game_ui.draw(self.elapsed_rounds)
 
                     # Processa eventos
                     for event in pygame.event.get():
+                        self.game_ui.handle_event(event)
                         if event.type == pygame.QUIT:
                             self.network.disconnect()
                             return 
