@@ -83,6 +83,11 @@ class WinnerScreen:
             name_text = text_font.render(winner.name, True, (255, 255, 255))
             screen.blit(name_text, (screen.get_width() // 2 - name_text.get_width() // 2, 200))
 
+           
+            winner_sprite = winner.animations["down"][0]
+            scaled_sprite = pygame.transform.scale(winner_sprite, (128, 128)).convert_alpha()
+            screen.blit(scaled_sprite, (screen.get_width() // 2 - 64, 280))
+
             # Instrução para sair
             back_text = text_font.render("Pressione ENTER para sair", True, (200, 200, 200))
             screen.blit(back_text, (screen.get_width() // 2 - back_text.get_width() // 2, 450))

@@ -7,7 +7,7 @@ SERVER_IP = '127.0.0.1'
 SERVER_PORT = 5555 
 
 # Número máximo de jogadores permitido na partida
-MAX_PLAYERS = 4
+MAX_PLAYERS = 1
 
 # Configurações do sprite
 

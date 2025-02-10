@@ -51,7 +51,7 @@ class Game:
         if (result == None):
             return
         
-        print(f"\nConectado com ID: {result["id"]}")
+        print(f'\nConectado com ID: {result["id"]}')
 
         self.map = Map(*result["map"]) 
         self.player_data = result["players"] 
