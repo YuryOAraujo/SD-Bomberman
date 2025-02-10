@@ -245,11 +245,11 @@ class Player(pygame.sprite.Sprite):
         """
 
         if power_code == 3:  
-            self.explosion_range += 1
+            self.explosion_range = 2
         elif power_code == 4:
             self.has_extra_bomb_power = True
         elif power_code == 5:
-            self.speed += 1
+            self.speed = 6
         else:
             print(f"Código de poder inválido: {power_code}")
 
