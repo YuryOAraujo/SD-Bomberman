@@ -10,6 +10,7 @@ class MapManager:
     def __init__(self, stage_name):
 
         self.stage_name = stage_name
+        print(stage_name)
 
         # Faz uma cópia profunda do grid base para não modificar a base original
         self.grid = self.grid = copy.deepcopy(GRID_BASE[stage_name])

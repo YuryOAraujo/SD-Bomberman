@@ -7,7 +7,7 @@ SERVER_IP = '127.0.0.1'
 SERVER_PORT = 5555 
 
 # Número máximo de jogadores permitido na partida
-MAX_PLAYERS = 2  
+MAX_PLAYERS = 4
 
 # Configurações do sprite
 
@@ -47,6 +47,6 @@ MESSAGE_TYPES = {
 PLAYER_POSITIONS = [
     (48, 48),
     (624, 48),
-    (48, 624),
-    (624, 624)
+    (48, 576),
+    (624, 576)
 ]
