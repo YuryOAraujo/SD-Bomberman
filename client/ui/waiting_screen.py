@@ -20,6 +20,7 @@ class WaitingScreen:
             g = start_color[1] + (end_color[1] - start_color[1]) * y / height
             b = start_color[2] + (end_color[2] - start_color[2]) * y / height
             pygame.draw.line(background, (int(r), int(g), int(b)), (0, y), (width, y))
+            
         return background
 
     def draw(self, players, loading=False, progress=0):

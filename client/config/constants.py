@@ -88,7 +88,8 @@ MESSAGE_TYPES = {
     "WIN": "WIN",
     "ROUND_RESET": "ROUND_RESET",
     "ELIMINATED": "ELIMINATED",
-    "GAME_OVER": "GAME_OVER"
+    "GAME_OVER": "GAME_OVER",
+    "MAP_CHOICE": "MAP_CHOICE"
 }
 
 # Dados padrão da bomba

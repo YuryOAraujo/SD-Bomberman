@@ -15,6 +15,7 @@ class Server:
     def __init__(self):
 
         self.network = NetworkServer()
+        self.first_connection_done = False
         self.current_round = 1
         self.max_wins = 3
         self.player_wins = [0] * self.network.max_clients
@@ -59,6 +60,8 @@ class Server:
                 self.handle_game_state(data, addr)
             elif msg_type == MESSAGE_TYPES["START"]:
                 self.start_game()
+            elif msg_type == MESSAGE_TYPES["MAP_CHOICE"]:
+                self.handle_choice_map(data, addr)
             elif msg_type == MESSAGE_TYPES["DISCONNECTED"]:
                 self.handle_disconnect(addr)
             elif msg_type == MESSAGE_TYPES["UPDATE"]:
@@ -74,6 +77,22 @@ class Server:
 
         except json.JSONDecodeError:
             print("Erro ao decodificar dados.")
+
+    def handle_choice_map(self, data, addr):
+        
+        if data["map_choice"] == "Mapa1":
+            choice = 0
+        else: 
+            choice = 1
+
+        self.map_manager = MapManager(STAGES[choice])
+
+        response = {
+            "type": MESSAGE_TYPES["MAP_CHOICE"],
+            "map_choice": (self.map_manager.get_grid(), self.map_manager.get_stage()),
+        }
+
+        self.network.send_message(response, addr)
 
     def get_game_state(self):
         return  {
@@ -96,7 +115,6 @@ class Server:
                 print("Tentativa de conexão recusada: jogo em andamento.")
                 response = {"type": MESSAGE_TYPES["GAME_IN_PROGRESS"]}
                 self.network.send_message(response, addr)
-
                 return
 
             """Gerencia novas conexões de clientes."""
@@ -123,12 +141,20 @@ class Server:
 
                 self.player_states = self.get_game_state()
 
-                # Monta a resposta com ID, estados dos jogadores e informações do mapa
+                # Define se o jogador é o host (apenas na primeira conexão válida)
+                is_host = client_id == 1 and not self.first_connection_done
+
+                # Após a primeira conexão, bloqueia novas escolhas de mapa
+                if is_host:
+                    self.first_connection_done = True
+
+                # Monta a resposta com ID, estados dos jogadores, informações do mapa e host
                 response = {
                     "type": MESSAGE_TYPES["CONNECT"],
                     "id": client_id,
                     "players": self.player_states,
-                    "map": (self.map_manager.get_grid(), self.map_manager.get_stage())
+                    "map": (self.map_manager.get_grid(), self.map_manager.get_stage()),
+                    "host": is_host
                 }
 
                 self.network.send_message(response, addr)
@@ -351,3 +377,4 @@ class Server:
         print("Reset all")
         print("Jogo reiniciado!")
         self.network.disconnect_all()
+        self.first_connection_done = False

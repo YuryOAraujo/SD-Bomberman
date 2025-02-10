@@ -18,7 +18,7 @@ from ui.game_ui import GameUI
 from ui.waiting_screen import WaitingScreen
 from ui.winner_screen import WinnerScreen
 from ui.error_window import show_error_window
-
+from ui.choice_map_screen import MapSelectionScreen
 
 class Game:
 
@@ -53,12 +53,23 @@ class Game:
         
         print(f'\nConectado com ID: {result["id"]}')
 
-        self.map = Map(*result["map"]) 
         self.player_data = result["players"] 
 
         self.player_manager = PlayerManager(self.network, self.player_data)
         self.player_manager.initialize_players()
         self.last_position = (0, 0)
+
+        if (result["host"] == True):
+            choice_mapa = MapSelectionScreen(self.screen, self.network)
+            map_choice = choice_mapa.run()
+            if (map_choice is None):
+                self.network.disconnect()
+                return
+            
+            if (map_choice != "Random"):
+                result["map"] = self.send_choice_map(map_choice)
+
+        self.map = Map(*result["map"]) 
 
         waiting_screen = WaitingScreen(self.screen, self.network)
         self.player_data = waiting_screen.wait_for_game_start(self.player_data)
@@ -230,6 +241,22 @@ class Game:
         }
 
         self.network.send_message(data)
+
+    def send_choice_map(self, map_choice):
+
+        # Envia a escolha do mapa para o servidor
+
+        data = {
+            "type": MESSAGE_TYPES["MAP_CHOICE"],
+            "map_choice": map_choice
+        }
+
+        self.network.send_message(data)
+
+        response = self.network.receive_messages()
+
+        if response and response.get("type") == MESSAGE_TYPES["MAP_CHOICE"]:
+            return response["map_choice"]
 
     def process_messages(self):
 
