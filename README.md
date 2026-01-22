@@ -20,7 +20,7 @@ Original Bomb Party sprite sheet by Matt Hackett of Lost Decade Games, expanded 
 ## 🔧 How to Run
 1. Clone this repository:
    ```sh
-   git clone https://github.com/your-username/bomberman.git
+   https://github.com/YuryOAraujo/SD-Bomberman.git
    ```
 2. Start the server:
    ```sh
